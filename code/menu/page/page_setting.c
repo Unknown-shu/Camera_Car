@@ -18,6 +18,7 @@ int8 row_number=1;
 int8 main_line_number = 1;
 int8 navigation_line_number = 1;
 int8 Camera_line_number = 1;
+int8 Config_line_number = 1;
 //*******页面行记忆变量*******//
 
 float increment1[4]={0,1,10,100};

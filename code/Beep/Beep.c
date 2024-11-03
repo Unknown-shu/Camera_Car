@@ -21,6 +21,7 @@ void Beep_ShortRing(void)
 {
     Beep_Start();
     system_delay_ms(3);
+//    system_delay_us(200);
     Beep_Stop();
 }
 

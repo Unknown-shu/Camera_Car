@@ -7,7 +7,7 @@
 #define dis_MT9V03X_W 128
 #define dis_MT9V03X_H 64
 
-#define PenColor RGB565_Pansy //»­±ÊÑÕÉ«
+#define PenColor RGB565_WHITE //»­±ÊÑÕÉ«
 #define BackgroundColor RGB565_Gray //±³¾°ÑÕÉ«
 
 #define PenColor_else RGB565_RED //»­±ÊÑÕÉ«

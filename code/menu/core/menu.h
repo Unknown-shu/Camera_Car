@@ -11,14 +11,16 @@
 #include "zf_common_headfile.h"
 #include "mymenu.h"
 #include "MyHeadFile.h"
+#include "STDBOOL.H"
 
 /*菜单，具体是哪个页面，这个留给用户自己去添加*/
 typedef enum
 {
     MAIN_PAGE = 0,
     Start_PAGE =1,
-    NAVIGATION_PAGE   =2,
-    Camera_PAGE = 3,
+    Config_PAGE =2,
+    NAVIGATION_PAGE   =3,
+    Camera_PAGE = 4,
 
 
 } MENU;
@@ -70,5 +72,13 @@ void Set_Event_Code(struct Menu *handle, int Event_Code);
 void pagelimit(int8 *page_num,uint8 page_num_max);
 /*菜单处理*/
 void Menu_Handler(struct Menu *handle);
+
+void menu_Val_CFG(float *CFG_val, uint16 page_start_row, float basic_val );
+void menu_Val_CFG_clear(uint16 *page_start_row);
+void menu_Val_CFG_Flush(float *CFG_val, uint16 page_start_row, bool temp_based_flag);
+void menu_Val_CFG_Limit(uint16 *line, uint16 line_max);
+void menu_Val_CFG_Arrow_Show(uint16 page_start_row,uint16 line_num);
+void menu_Set_CFG_OpenClose_Show(uint16 page_start_row, uint8 value);
+void menu_Set_CFG_Value_Toggle(uint8 *value);
 
 #endif /* CODE_CPU2_MENU_CORE_MENU_H_ */

@@ -1,12 +1,18 @@
-#include "MyHeadfile.h"
+#include "MYENCODER.h"
 
 int16 Encoder_speed_l = 0;
 int16 Encoder_speed_r = 0;
+
+int16 switch_encoder_num = 0;
+
+int16 switch_encoder_num_flag = 0;
 
 void MyEncoder_Init(void)
 {
     encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//左轮编码器
     encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//右轮编码器
+    encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
+//    encoder_dir_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 
 }
 //-------------------------------------------------------------------------------------------------------------------
@@ -53,6 +59,21 @@ int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
             }
             CoderOut = Coder/n;
             break;
+        case TIM3_ENCODER:
+            for(int i = 0;i < n;i++)
+            {
+                if(direct)
+                {
+                    Coder +=  encoder_get_count(TIM3_ENCODER);
+                }
+                else
+                {
+                    Coder -=  encoder_get_count(TIM3_ENCODER);
+                }
+
+            }
+            CoderOut = Coder/n;
+            break;
         default:
             break;
     }
@@ -67,10 +88,28 @@ int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
 //  @return     int16
 //  @note       里面的自加，自减根据实际情况调，车往前进是两个编码器值都为正
 //-------------------------------------------------------------------------------------------------------------------
-void getspeed(void)
+void GetSpeed(void)
 {
  // 获取编码器的值
     Encoder_speed_l = -Encoder_MTM(TIM2_ENCODER,3,1);
     Encoder_speed_r = -Encoder_MTM(TIM6_ENCODER,3,1);
+//    Encoder_speed_r = -Encoder_MTM(TIM3_ENCODER,1,1);
     //JustFloat_Test();
 };
+
+void Get_Switch_Num(void)
+{
+    int tmp;
+//    tmp = -Encoder_MTM(TIM3_ENCODER,3,0);
+    tmp = encoder_get_count(TIM3_ENCODER);
+    encoder_clear_count(TIM3_ENCODER);
+//    if(tmp != 0)
+//        switch_encoder_num_flag = 1;
+        switch_encoder_num += tmp;
+//    if(switch_encoder_num_flag == 1 && switch_encoder_num % 4 == 0 && switch_encoder_num >= 4)
+//    {
+//        switch_encoder_num -= 3;
+//        switch_encoder_num_flag = 0;
+//    }
+//    printf("Test");
+}

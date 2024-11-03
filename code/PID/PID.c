@@ -5,10 +5,21 @@
  *     Author: 潘申奇
  */
 #include"PID.h"
-#define my_abs(num) (((num) > 0) ? (num) : -(num))
+#define MY_ABS(num) (((num) > 0) ? (num) : -(num))
+#define LIMIT_VAL(a,min,max) ((a)<(min)?(min):((a)>(max)?(max):(a)))
 
-PID_IncTypeDef Motor_Speed_PI;
+PID_IncTypeDef Motor_Speed_PID_Left;
+PID_IncTypeDef Motor_Speed_PID_Right;
+PID_IncTypeDef Turn_Speed_PID;
+PID_IncTypeDef Straight_Speed_PID;
 
+void PID_param_init(void)
+{
+    PID_Inc_Init(&Motor_Speed_PID_Left, motor_speed_Left_Kp, motor_speed_Left_Ki, 0);
+    PID_Inc_Init(&Motor_Speed_PID_Right, motor_speed_Right_Kp, motor_speed_Right_Ki, 0);
+    PID_Inc_Init(&Turn_Speed_PID,turn_speed_Kp, turn_speed_Ki, turn_speed_Kd);
+    PID_Inc_Init(&Straight_Speed_PID,straight_speed_Kp, straight_speed_Ki, straight_speed_Kd);
+}
 
 /*
 函数名称：PID_Inc_Init(PID_IncTypeDef *sptr, float kp, float ki, float kd)
@@ -18,8 +29,8 @@ PID_IncTypeDef Motor_Speed_PI;
 */
 void PID_Inc_Init(PID_IncTypeDef *sptr, float kp, float ki, float kd)
 {
-    sptr->Ek1 = 0; // 上次偏差值初始化
-    sptr->Ek2 = 0; // 上上次偏差值初始化
+    sptr->last_Ek = 0; // 上次偏差值初始化
+    sptr->Ek_sum = 0; // 上上次偏差值初始化
     sptr->Kp = kp; // 比例常数
     sptr->Ki = ki; // 积分常数
     sptr->Kd = kd; // 微分常数
@@ -39,19 +50,61 @@ float Positional_PID(PID_IncTypeDef *PID, float SetValue, float ActualValue, flo
 {
     float PIDInc;
     PID->Ek = SetValue - ActualValue;
-    PID->Ek2 += PID->Ek;
+    PID->Ek_sum += PID->Ek;
 
-    if (PID->Ek2 > Max_I)
-        PID->Ek2 = Max_I;
-    if (PID->Ek2 < -Max_I)
-        PID->Ek2 = -Max_I;
+    if (PID->Ek_sum > Max_I)
+        PID->Ek_sum = Max_I;
+    if (PID->Ek_sum < -Max_I)
+        PID->Ek_sum = -Max_I;
 
     PIDInc = (PID->Kp * PID->Ek) +
-             (PID->Ki * PID->Ek2) +
-             (PID->Kd * (PID->Ek - PID->Ek1));
-    PID->Ek1 = PID->Ek;
+             (PID->Ki * PID->Ek_sum) +
+             (PID->Kd * (PID->Ek - PID->last_Ek));
+    PID->last_Ek = PID->Ek;
     return PIDInc;
 }
+
+/*
+函数名称：Incremental_PID
+函数功能：增量式PID
+函数变量：
+    *PID: PID参数结构体
+    SetValue: 设定值
+    ActualValue: 实际值
+例子：
+*/
+/***********************************************
+* @brief : 增量式PID
+* @param : *PID: PID参数结构体
+            SetValue：设定值
+            ActualValue：实际值
+* @return: 返回值
+* @date  : 修改日期
+* @author: 作者
+************************************************/
+int Incremental_PID(PID_IncTypeDef *PID, float SetValue, float ActualValue)
+{
+
+
+    // 计算当前偏差
+    PID->Ek = SetValue - ActualValue;
+
+    // 计算PID增量公式
+    PID->OUT += ((PID->Kp * (PID->Ek - PID->last_Ek)) +                   // P部分：当前偏差与上次偏差之差
+                 (PID->Ki * PID->Ek)) +                                    // I部分：当前偏差积分
+                 (PID->Kd * (PID->Ek - 2 * PID->last_Ek + PID->Ek_sum));  // D部分：当前偏差、上次偏差与上上次偏差之组合
+
+    // 更新偏差值
+    PID->Ek_sum = PID->last_Ek;  // 保存上上次偏差
+    PID->last_Ek = PID->Ek;   // 保存上次偏差
+
+    if(PID->OUT >= 6000)
+        PID->OUT = 6000;
+
+    // 返回增量值
+    return PID->OUT;
+}
+
 
 /*
 函数名称：PID_clear(PID_IncTypeDef *sptr)
@@ -61,15 +114,11 @@ float Positional_PID(PID_IncTypeDef *PID, float SetValue, float ActualValue, flo
 */
 void PID_clear(PID_IncTypeDef *sptr)
 {
-    sptr->Ek1 = 0; // 上次偏差值初始化
-    sptr->Ek2 = 0; // 上上次偏差值初始化
-    //    sptr->OUT = 0;
+    sptr->last_Ek = 0; // 上次偏差值初始化
+    sptr->Ek_sum = 0; // 上上次偏差值初始化
+    sptr->OUT = 0;
 }
 
-void PID_param_init(void)
-{
-
-}
 /*
 函数名称：set_pid_target(PID_IncTypeDef *pid, float temp_val)
 函数功能：设置目标值

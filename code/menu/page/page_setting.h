@@ -20,6 +20,7 @@ extern uint8 line_number_max;
 extern int8 main_line_number;
 extern int8 navigation_line_number;
 extern int8 Camera_line_number;
+extern int8 Config_line_number;
 //*******页面行记忆变量*******//
 
 extern int8 row_number;
@@ -33,9 +34,11 @@ extern float mtspeedlevel[5];
 //*******页添加*******//
 
 void main_page_process(int Event_Code);
-void start_page_process(int Event_Code);
+void Start_page_process(int Event_Code);
 void Camera_page_process(int Event_Code);
 void navigation_page_process(int Event_Code);
+void Config_page_process(int Event_Code);
+
 
 //*******页添加*******//
 

@@ -11,7 +11,7 @@
 
 void main_page_process(int Event_Code)
 {
-    line_number_max=3;
+    line_number_max=4;
 
    //显示菜单
 
@@ -20,15 +20,23 @@ void main_page_process(int Event_Code)
 //  1.组合导航
     if(line_number!=1) ips200_show_string_color(0, 18,"START", PenColor);
     else              ips200_show_string_color(0, 18,"START", PenColor_else);
-////   2.电机控制
-    if(line_number!=2) ips200_show_string_color(0, 18*2,"SETTING", PenColor);
-     else              ips200_show_string_color(0, 18*2,"SETTING", PenColor_else);
-//
-    if(line_number!=3) ips200_show_string_color(0, 18*3,"Camera", PenColor);
-     else              ips200_show_string_color(0, 18*3,"Camera", PenColor_else);
 
-    if(line_number!=4) ips200_show_string_color(0, 18*4,"", PenColor);
-     else              ips200_show_string_color(0, 18*4,"", PenColor_else);
+    if(line_number!=2) ips200_show_string_color(0, 18*2,"Config", PenColor);
+    else              ips200_show_string_color(0, 18*2,"Config", PenColor_else);
+////   2.电机控制
+    if(line_number!=3) ips200_show_string_color(0, 18*3,"Value", PenColor);
+     else              ips200_show_string_color(0, 18*3,"Value", PenColor_else);
+//
+    if(line_number!=4) ips200_show_string_color(0, 18*4,"Camera", PenColor);
+     else              ips200_show_string_color(0, 18*4,"Camera", PenColor_else);
+
+    if(line_number!=5) ips200_show_string_color(0, 18*5,"", PenColor);
+     else              ips200_show_string_color(0, 18*5,"", PenColor_else);
+
+    ips200_show_string_color(0, 18*5,"L:", PenColor_else);
+    ips200_show_int(32, 18*5, target_left, 3);
+    ips200_show_string_color(0, 18*6,"R:", PenColor_else);
+    ips200_show_int(32, 18*6, target_right, 3);
 
     if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
     {
@@ -58,24 +66,21 @@ void main_page_process(int Event_Code)
            {
                case 1:
                    Set_Menu(&menu, Start_PAGE);
-//                   line_number=1;
                    ips200_clear();
+
                    break ;
                case 2:
-                   Set_Menu(&menu, NAVIGATION_PAGE);
-//                   line_number=1;
+                   Set_Menu(&menu, Config_PAGE);
                    ips200_clear();
                    break ;
                case 3:
-                   Set_Menu(&menu, Camera_PAGE);
-//                   line_number=1;
+                   Set_Menu(&menu, NAVIGATION_PAGE);
                    ips200_clear();
                    break ;
-//               case 4:
-//                   Set_Menu(&menu, IMAGE_PAGE);
-//                    line_number=1;
-//                    ips200_clear();
-//                    break ;
+               case 4:
+                   Set_Menu(&menu, Camera_PAGE);
+                   ips200_clear();
+                    break ;
                default:
                    break ;
            }
@@ -83,4 +88,7 @@ void main_page_process(int Event_Code)
 
 }
 
-
+//void menu_Val_CFG(float *CFG_Val, uint8 page_row, float basic_Val)
+//{
+//
+//}

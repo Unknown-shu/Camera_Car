@@ -71,50 +71,90 @@
 // **************************** 代码区域 ****************************
 
 #define IPS200_TYPE     (IPS200_TYPE_SPI)                                       // 双排排针 并口两寸屏 这里宏定义填写 IPS200_TYPE_PARALLEL8
-                                                                                // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
-uint16_t Gray_Threshold = 64;
 
-uint8_t Init_End_Flag;
+                                                                          // 单排排针 SPI 两寸屏 这里宏定义填写 IPS200_TYPE_SPI
+uint8_t Init_End_Flag;                  //初始化结束标志符
+//uint8 button1,button2,button3,button4;  //四个按键
 
 
-uint8 button1,button2,button3,button4;
 
 int core0_main(void)
 {
+
     clock_init();                   // 获取时钟频率<务必保留>
     debug_init();                   // 初始化默认调试串口
-
-
     // 此处编写用户代码 例如外设初始化代码等
+
+    uint8 FPS;
 
     system_delay_init();            //延迟初始化
     Menu_init();                    //菜单初始化
     Beep_Init();                    //蜂鸣器初始化
     ips200_init(IPS200_TYPE);       //屏幕初始化
     MyCamera_Init();                //摄像头初始化
-    MyEncoder_Init();
+    MyEncoder_Init();               //编码器初始化
+    Motor_Init();                   //电机初始化
+    PID_param_init();               //PID参数初始化
+    key_init(20);                   //按键初始化
+    UART_Init();                    //串口初始化
 
-    key_init(10);                   //按键初始化
-    pit_ms_init(CCU60_CH0, 10);     //按键扫描中断初始化
 
 
+    pit_ms_init(CCU60_CH0, 20);     //按键扫描中断初始化
+    pit_ms_init(CCU60_CH1, 1000);     //按键扫描中断初始化
+    pit_ms_init(CCU61_CH0, 5);     //pid中断
 
+    Flash_Init();
     // 此处编写用户代码 例如外设初始化代码等
 	cpu_wait_event_ready();         // 等待所有核心初始化完毕
 
-	Beep_MediumRing();
+	             //商店蜂鸣
+	ips200_set_color(RGB565_WHITE, RGB565_BLACK);
 	ips200_clear();
 
+	Wifi_Image_Init();
+
+	Beep_MediumRing();
 	Init_End_Flag = 1;
 
-	while (TRUE)
-	{
+
+
+    while (TRUE)
+    {
+
+
         // 此处编写需要循环执行的代码
+        if(g_Car_Status == 0 || g_started_debug == 1)
+            Menu_Handler(&menu);
+        else if (Key_IfEnter())
+        {
+            Car_Stop();
+        }
 
-	    Menu_Handler(&menu);
 
 
+
+
+//      FPS = 1000 / g_past_time ;
+//        ips200_show_int(204,0 , FPS, 3);
+
+        ips200_show_int(188, 0, camera_process_FPS, 5);
+//        ips200_show_int(188, 18, g_past_time, 5);
+//        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, middle[0], MT9V03X_W, MT9V03X_H);
+//        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, left[0], MT9V03X_W, MT9V03X_H);
+//        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, right[0], MT9V03X_W, MT9V03X_H);
+
+
+
+//	    ips200_show_int(204,0 , enter_flag, 3);
+//	    printf("%d ,%d ,%d ,%d, %d, %d\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r,pwm_left, pwm_right);
+//	    printf("%d ,%d ,%d ,%d,\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r);
+//	    printf("%d\r\n",V0);
         // 此处编写需要循环执行的代码
+//	    Get_Switch_Num();
+//	    printf("%d\r\n",switch_encoder_num);
+//	    uart_write_string(UART_2, "Test\r\n");
+
 	}
 }
 

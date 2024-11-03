@@ -67,7 +67,7 @@ void Menu_Handler(struct Menu *handle)
             break ;
         case Start_PAGE :
             /*针对注册的键值做相应的处理*/
-            start_page_process(handle->KeyEvent);
+            Start_page_process(handle->KeyEvent);
             break ;
 
         case NAVIGATION_PAGE :
@@ -77,6 +77,9 @@ void Menu_Handler(struct Menu *handle)
         case Camera_PAGE :
             /*针对注册的键值做相应的处理*/
             Camera_page_process(handle->KeyEvent);
+            break ;
+        case  Config_PAGE :
+            Config_page_process(handle->KeyEvent);
             break ;
 //        case SERVO_PAGE :
 //            /*针对注册的键值做相应的处理*/
@@ -142,3 +145,274 @@ void Menu_Handler(struct Menu *handle)
 
 }
 
+/***********************************************
+* @brief : 菜单参数配置子页面
+* @param : *CFG_val              需要配置的值的地址，记得&
+*           page_start_row       起始行
+*           basic_val            基准参数
+* @return: void
+* @date  : 2024.10.15
+* @author: SJX
+************************************************/
+#define VAL_VFG_SHOW_NUM_BIT          6
+#define VAL_VFG_SHOW_POINT_BIT        6
+#define VAL_VFG_SHOW_TOTAL_LINE       5                     //总行数，包含变量固定行和几个数字行和exit行
+#define LINE_MAX                      4
+uint8 up_down_flag = 0;         //调参菜单在上面还是在下面，默认为0在下面，为1在上面
+float basic_1, basic_10, basic_100 ;
+uint16_t menu_Val_CFG_line;
+void menu_Val_CFG(float *CFG_val, uint16 page_start_row, float basic_val )
+{
+    uint8 flush_flag;
+    uint8 CFG_stop_flag = 0;
+    menu_Val_CFG_line = 1;
+    bool based_flag = 0;                            //选中标志位，选中为1，不选中为0
+    basic_1 = basic_val;
+    basic_10 = basic_val / 10 ;
+    basic_100 = basic_val / 100;
+
+
+    if(page_start_row > (319 - (10+18+ 18 * VAL_VFG_SHOW_TOTAL_LINE)))
+    {
+        up_down_flag = 1;
+    }
+    else up_down_flag = 0;
+    menu_Val_CFG_clear(&page_start_row);
+    ips200_set_color(RGB565_WHITE, RGB565_BLACK);
+    menu_Val_CFG_Flush(CFG_val, page_start_row, based_flag);
+    while(CFG_stop_flag == 0)
+    {
+//        printf("%d ,%d ,%d ,%d, %d, %d\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r,pwm_left, pwm_right);
+        flush_flag = Key_IfEnter();
+        if(flush_flag == 1)
+        {
+            if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
+            {
+                switch(menu_Val_CFG_line)
+                {
+                    case 1:
+                        based_flag = !based_flag;
+                        break;
+
+                    case 2:
+                        based_flag = !based_flag;
+                        break;
+
+                    case 3:
+                        based_flag = !based_flag;
+                        break;
+
+                    case 4:
+                        CFG_stop_flag = 1;
+                        break;
+                }
+            }
+            if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
+            {
+                if(based_flag == 0)
+                {
+                    menu_Val_CFG_line++;
+                    menu_Val_CFG_Limit(&menu_Val_CFG_line, LINE_MAX);
+                }
+                else
+                {
+                    switch (menu_Val_CFG_line)
+                    {
+                        case 1:
+                            *CFG_val += basic_1;
+                            break;
+                        case 2:
+                            *CFG_val += basic_10;
+                            break;
+                        case 3:
+                            *CFG_val += basic_100;
+                            break;
+                    }
+                }
+
+            }
+            if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
+            {
+                if(based_flag == 0)
+                {
+                    menu_Val_CFG_line--;
+                    menu_Val_CFG_Limit(&menu_Val_CFG_line, LINE_MAX);
+                }
+                else
+                {
+                    switch (menu_Val_CFG_line)
+                    {
+                        case 1:
+                            *CFG_val -= basic_1;
+                            break;
+                        case 2:
+                            *CFG_val -= basic_10;
+                            break;
+                        case 3:
+                            *CFG_val -= basic_100;
+                            break;
+                    }
+                }
+
+            }
+            menu_Val_CFG_Flush(CFG_val, page_start_row, based_flag);
+            Beep_ShortRing();
+            Flash_WriteAllVal();
+        }
+    }
+    ips200_clear();
+
+}
+/***********************************************
+* @brief : 菜单参数配置子页面清屏函数(置黑)并确定起始行
+* @param : page_start_row       起始行
+* @return: void
+* @date  : 2024.10.18
+* @author: SJX
+************************************************/
+void menu_Val_CFG_clear(uint16 *page_start_row)
+{
+    uint16 i = 0;
+    if(up_down_flag == 0)
+    {
+
+        for(i = *page_start_row + 18; i < *page_start_row + 10+18 + VAL_VFG_SHOW_TOTAL_LINE * 18; i++)
+        {
+            ips200_draw_line(0, i, 239, i, RGB565_BLACK);
+        }
+        *page_start_row = *page_start_row + 5 + 18 * 1;
+
+    }
+    else if(up_down_flag == 1)
+    {
+        for(i = *page_start_row  ; i > *page_start_row -10 -18 * VAL_VFG_SHOW_TOTAL_LINE  ; i--)
+        {
+            ips200_draw_line(0, i, 239, i, RGB565_BLACK);
+        }
+        *page_start_row = *page_start_row -5 - 18 * VAL_VFG_SHOW_TOTAL_LINE;
+    }
+}
+/***********************************************
+* @brief : 菜单参数配置子页面变量刷新函数
+* @param : *CFG_val              需要配置的值的地址，记得&
+*           page_start_row       起始行
+* @return: void
+* @
+* @date  : 2024.10.18
+* @author: SJX
+************************************************/
+void menu_Val_CFG_Flush(float *CFG_val, uint16 page_start_row,  bool temp_based_flag)
+{
+        ips200_show_float(0, page_start_row + 18*0, *CFG_val, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
+        menu_Val_CFG_Arrow_Show(page_start_row, menu_Val_CFG_line);
+        if(temp_based_flag == 1)
+        {
+            if(menu_Val_CFG_line == 1)  ips200_show_float_color(18, page_start_row + 18 * menu_Val_CFG_line, basic_1, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_RED);
+            else                ips200_show_float_color(18, page_start_row + 18 * 1, basic_1, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_WHITE);
+
+            if(menu_Val_CFG_line == 2)  ips200_show_float_color(18, page_start_row + 18 * menu_Val_CFG_line, basic_10, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_RED);
+            else                ips200_show_float_color(18, page_start_row + 18 * 2, basic_10, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_WHITE);
+
+            if(menu_Val_CFG_line == 3)  ips200_show_float_color(18, page_start_row + 18 * menu_Val_CFG_line, basic_100, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_RED);
+            else                ips200_show_float_color(18, page_start_row + 18 * 3, basic_100, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_WHITE);
+
+            if(menu_Val_CFG_line == 4)  ips200_show_string_color(18, page_start_row + 18 * menu_Val_CFG_line, "exit", RGB565_RED);
+            else                ips200_show_string_color(18, page_start_row + 18 * 4, "exit", RGB565_WHITE);
+
+        }
+        else
+        {
+            ips200_show_float(18, page_start_row + 18*1, basic_1, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
+            ips200_show_float(18, page_start_row + 18*2, basic_10, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
+            ips200_show_float(18, page_start_row + 18*3, basic_100, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
+            ips200_show_string(18, page_start_row + 18*4, "exit");
+        }
+
+//    uint8 i;
+//    i = Key_IfEnter();
+//    val_cfg_key_ifenter_flag += i;
+    key_clear_all_state();
+}
+/***********************************************
+* @brief : 菜单参数配置子页面行数限幅函数
+* @param : *line              需要配置的行的地址，记得&
+*           line_max          最大行
+* @return: void
+* @
+* @date  : 2024.10.18
+* @author: SJX
+************************************************/
+void menu_Val_CFG_Limit(uint16 *line, uint16 line_max)
+{
+    if(*line > line_max)
+    {
+        *line = 1;
+    }
+    else if(*line < 1)
+    {
+        *line = line_max;
+    }
+}
+
+/***********************************************
+* @brief : 菜单参数配置子页面箭头显示
+* @param : *line              需要配置的行的地址，记得&
+*           line_max          最大行
+* @return: void
+* @
+* @date  : 2024.10.19
+* @author: SJX
+************************************************/
+void menu_Val_CFG_Arrow_Show(uint16 page_start_row,uint16 line_num)
+{
+    for (uint16 i = 1; i <= 4; i++)
+    {
+        if (i == line_num)
+        {
+            // 当前行显示 "->"
+            ips200_show_string(0, page_start_row + i * 18, "->");
+        }
+        else
+        {
+            // 其他行显示空格
+            ips200_show_string(0, page_start_row + i * 18, "  ");
+        }
+    }
+}
+/***********************************************
+* @brief : cfg菜单open close显示
+* @param : page_start_row     起始行
+*          value              值 1开0关
+* @return: void
+* @date  : 2024年10月31日15:55:00
+* @author: SJX
+************************************************/
+void menu_Set_CFG_OpenClose_Show(uint16 page_start_row, uint8 value)
+{
+    if(value == 1)
+    {
+        ips200_show_string(190, page_start_row, "Open ");
+    }
+    else if(value == 0)
+    {
+        ips200_show_string(190, page_start_row, "Close");
+    }
+    else
+    {
+        ips200_show_string(190, page_start_row, "ValEr");
+    }
+}
+/***********************************************
+* @brief : cfg菜单open close显示
+* @param : value              需要翻转的值 ，传递地址
+* @return: void
+* @date  : 2024年10月31日15:55:00
+* @author: SJX
+************************************************/
+void menu_Set_CFG_Value_Toggle(uint8 *value)
+{
+    if(*value == 1)
+        *value = 0;
+    else
+        *value = 1;
+}

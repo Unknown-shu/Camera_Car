@@ -7,18 +7,18 @@
 #include "zf_common_headfile.h"
 #include "mymenu.h"
 
-void start_page_process(int Event_Code)
+void Start_page_process(int Event_Code)
 {
-    line_number_max=5;
+    line_number_max=2;
 
 
    //œ‘ æ≤Àµ•
     ips200_show_string_color(105, 0,"START", PenColor);
 
-    if(line_number!=1)     ips200_show_string_color(0, 18,"", PenColor);
-     else                  ips200_show_string_color(0, 18,"", PenColor_else);
-    if(line_number!=2)     ips200_show_string_color(0, 18*2,"", PenColor);
-     else                  ips200_show_string_color(0, 18*2,"", PenColor_else);
+    if(line_number!=1)     ips200_show_string_color(0, 18,"Start", PenColor);
+     else                  ips200_show_string_color(0, 18,"Start", PenColor_else);
+    if(line_number!=2)     ips200_show_string_color(0, 18*2,"Wifi_Image_Init", PenColor);
+     else                  ips200_show_string_color(0, 18*2,"Wifi_Image_Init", PenColor_else);
     if(line_number!=3)     ips200_show_string_color(0, 18*3,"", PenColor);
      else                  ips200_show_string_color(0, 18*3,"", PenColor_else);
     if(line_number!=4)     ips200_show_string_color(0, 18*4,"", PenColor);
@@ -66,10 +66,11 @@ void start_page_process(int Event_Code)
         {
             case 1:
 
-
+                Car_Start();
                 break ;
             case 2:
-
+                Wifi_Image_Init();
+                g_wifi_image_open_flag = 1;
                 break;
             case 3:
 

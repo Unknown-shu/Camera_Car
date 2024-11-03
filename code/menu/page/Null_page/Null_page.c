@@ -1,9 +1,17 @@
+/*
+ * Null_page.c
+ *
+ *  Created on: 2024年9月27日
+ *      Author: SJX
+ */
+
 #include "MyHeadfile.h"
 // /*
 // * 空白页
 // * 使用时请更改Null_line_number
 // *       在page_setting添加null_page_process()
 // *                      和extern Null_line_number
+// *       在menu.c中Menu_Handler()函数添加case
 // *
 // */
 //#include "zf_common_headfile.h"
