@@ -62,7 +62,9 @@ IFX_INTERRUPT(cc60_pit_ch1_isr, 0, CCU6_0_CH1_ISR_PRIORITY)
 
 IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
 {
+        Beep_Stop();
         SysTimer_Stop();
+
 //    interrupt_global_enable(0);                     // ¿ªÆôÖÐ¶ÏÇ¶Ì×
         static uint8 i = 0;
         if(i++ > 100)
@@ -77,10 +79,11 @@ IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
         }
         if(g_Car_Status == status_car_start)
         {
-            Turn_Ctrl();
+
         }
 //        GetSpeed();
 //        MotorCtrl();
+        Turn_Ctrl();
         if(g_Car_Status == status_car_stop)
         {
             Car_Stop();
@@ -89,16 +92,18 @@ IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
         MotorCtrl();
         pit_clear_flag(CCU61_CH0);
         SysTimer_Start();
+        Get_Switch_Num();
+
 }
 
 IFX_INTERRUPT(cc61_pit_ch1_isr, CCU6_1_CH1_INT_VECTAB_NUM, CCU6_1_CH1_ISR_PRIORITY)
 {
     interrupt_global_enable(0);                     // ¿ªÆôÖÐ¶ÏÇ¶Ì×
     pit_clear_flag(CCU61_CH1);
-
-
-
-
+    Beep_Stop();
+//    printf("Test");
+    pit_close(CCU61_CH1);
+//    pit_disable(CCU61_CH1);
 
 }
 // **************************** PITÖÐ¶Ïº¯Êý ****************************

@@ -2,19 +2,19 @@
 #define PID_H
 
 #define motor_speed_Left_Kp  8
-#define motor_speed_Left_Ki  3
+#define motor_speed_Left_Ki  4
 #define motor_speed_Left_Kd  5
 
 #define motor_speed_Right_Kp  8
-#define motor_speed_Right_Ki  3
+#define motor_speed_Right_Ki  4
 #define motor_speed_Right_Kd  5
 
 #define turn_speed_Kp   0.2
-#define turn_speed_Ki   0.01
+#define turn_speed_Ki   0.00
 #define turn_speed_Kd   11
 
 #define straight_speed_Kp   0.2
-#define straight_speed_Ki   0.01
+#define straight_speed_Ki   0.00
 #define straight_speed_Kd   11
 
 typedef struct {

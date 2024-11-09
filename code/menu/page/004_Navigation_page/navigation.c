@@ -26,8 +26,9 @@ void navigation_page_process(int Event_Code)
 
     enter_flag += Test;
 //    printf("%d\r\n",enter_flag);
-    if(enter_flag > 0)
+    if(enter_flag > 0 || If_Switch_Encoder_Change() == 1)
     {
+        Line_Num_Flush(&line_number);
         i = 0;
         enter_flag = 0;
 
@@ -70,9 +71,9 @@ void navigation_page_process(int Event_Code)
         else                      ips200_show_string_color(0, 18 * 9, "Turn_Speed_Kd", PenColor_else);
         ips200_show_float(VAL_SHOW_START_COL, 18 * 9, Turn_Speed_PID.Kd, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
 
-        if (line_number != 10)     ips200_show_string_color(0, 18 * 10, "V0", PenColor);
-        else                       ips200_show_string_color(0, 18 * 10, "V0", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18*10, V0, 3, 2);
+        if (line_number != 10)     ips200_show_string_color(0, 18 * 10, "basic_V0", PenColor);
+        else                       ips200_show_string_color(0, 18 * 10, "basic_V0", PenColor_else);
+        ips200_show_float(VAL_SHOW_START_COL, 18*10, basic_V0, 3, 2);
 
         // Straight Speed PID
         if (line_number != 11)    ips200_show_string_color(0, 18 * 11, "Straight_Speed_KP", PenColor);
@@ -89,20 +90,21 @@ void navigation_page_process(int Event_Code)
     }
     Test = Key_IfEnter();
 
-    if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
-    {
-        Beep_ShortRing();
-        line_number--;//高亮选择往下
-        pagelimit(&line_number,line_number_max);
-        i++;
-    }
-    if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
-    {
-        Beep_ShortRing();
-        line_number++; //高亮选择往上
-        pagelimit(&line_number,line_number_max);
-        i++;
-    }
+//    if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
+//    {
+//        Beep_ShortRing();
+//        line_number--;//高亮选择往下
+//        pagelimit(&line_number,line_number_max);
+//        i++;
+//    }
+//    if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
+//    {
+//        Beep_ShortRing();
+//        line_number++; //高亮选择往上
+//        pagelimit(&line_number,line_number_max);
+//        i++;
+//    }
+
     if(key_get_state(KEY_2) == KEY_SHORT_PRESS)
     {
         Beep_ShortRing();
@@ -138,7 +140,7 @@ void navigation_page_process(int Event_Code)
 
             // 转向PID参数调整
             case 7:
-                menu_Val_CFG(&Turn_Speed_PID.Kp, 18 * 7, 1);
+                menu_Val_CFG(&Turn_Speed_PID.Kp, 18 * 7, 0.1);
                 break;
             case 8:
                 menu_Val_CFG(&Turn_Speed_PID.Ki, 18 * 8, 0.1);
@@ -147,10 +149,10 @@ void navigation_page_process(int Event_Code)
                 menu_Val_CFG(&Turn_Speed_PID.Kd, 18 * 9, 1);
                 break;
             case 10:
-                menu_Val_CFG(&V0, 18 * 10, 50);
+                menu_Val_CFG(&basic_V0, 18 * 10, 50);
                 break;
             case 11:
-                menu_Val_CFG(&Straight_Speed_PID.Kp, 18 * 11, 1);
+                menu_Val_CFG(&Straight_Speed_PID.Kp, 18 * 11, 0.1);
                 break;
             case 12:
                 menu_Val_CFG(&Straight_Speed_PID.Ki, 18 * 12, 0.1);

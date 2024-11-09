@@ -4,6 +4,8 @@
 #define ZERBA_CROSSING_ROW  70         //∞ﬂ¬Ìœﬂ…®œﬂ–– ˝
 int g_camera_mid_err;
 
+float rd_calculate = 0;
+
 uint8 Camera_process_finish_flag = 0;
 uint8 Camera_Wifi_Image_Send_Flag = 0;
 uint8 camera_process_cnt = 0;
@@ -20,6 +22,7 @@ uint8 start_point_detection_flag ;
 int left[120]={2};       //◊Û±ﬂΩÁ ˝◊È   ¥”118ø™ º¥Ê  ¥Ê¥¢µƒÀ≥–Ú «µ⁄“ª––æÕ¥Ê‘⁄left[1]÷–      //Ã·»°µƒœﬂ‘⁄≈¿≥ˆœﬂµƒ¡– ˝…œ+1
 int right[120]={185};    //”“±ﬂΩÁ ˝◊È   ¥”118ø™ º¥Ê  ¥Ê¥¢µƒÀ≥–Ú «µ⁄“ª––æÕ¥Ê‘⁄right[1]÷–     //Ã·»°µƒœﬂ‘⁄≈¿≥ˆœﬂµƒ¡– ˝…œ-1
 int middle[120]={93};    //÷–œﬂ ˝◊È
+int left_tmp[120];
 
 uint8 left_copy[120]={2};
 uint8 right_copy[120]={185};
@@ -45,6 +48,9 @@ uint8 upper_left_inflection_Y =0;
 uint8 upper_right_inflection_flag=0;
 uint8 upper_right_inflection_X =0;
 uint8 upper_right_inflection_Y =0;
+uint8 circle_upper_right_inflection_flag=0;
+uint8 circle_upper_right_inflection_X =0;
+uint8 circle_upper_right_inflection_Y =0;
 uint8 left_straight_flag;
 uint8 right_straight_flag;
 uint8 ten_inflexion_down_l=0;    // Æ◊÷◊Ûœ¬π’µ„––◊¯±Í
@@ -59,6 +65,22 @@ uint8 cross_road_flag=0;       // Æ◊÷±Í÷æ
 uint8 cross_road_status=0;     // Æ◊÷◊¥Ã¨
 uint8 bend_straight_flag = 0;
 uint8 zebra_crossing_flag = 0;
+
+//…˙≥§∑ΩœÚ
+uint8 left_2_growth_direction=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ2µƒ∏ˆ ˝
+uint8 left_5_growth_direction=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ5µƒ∏ˆ ˝
+uint8 left_6_growth_direction=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ6µƒ∏ˆ ˝
+uint8 right_2_growth_direction=0;   //”“±ﬂ…˙≥§∑ΩœÚ2µƒ∏ˆ ˝
+uint8 right_5_growth_direction=0;   //”“±ﬂ…˙≥§∑ΩœÚ5µƒ∏ˆ ˝
+uint8 left_3_growth_direction=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ5µƒ∏ˆ ˝
+uint8 right_6_growth_direction=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ6µƒ∏ˆ ˝
+uint8 right_3_growth_direction=0;   //”“±ﬂ…˙≥§∑ΩœÚ2µƒ∏ˆ ˝
+uint8 l_growth_direction_flag=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ2±Í÷æŒª
+uint8 r_growth_direction_flag=0;    //”“±ﬂ…˙≥§∑ΩœÚ2±Í÷æŒª
+uint8 l_growth_direction_flag35=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ35±Í÷æŒª
+uint8 r_growth_direction_flag35=0;    //”“±ﬂ…˙≥§∑ΩœÚ35±Í÷æŒª
+uint8 l_growth_direction_flag6=0;    //◊Û±ﬂ…˙≥§∑ΩœÚ35±Í÷æŒª
+uint8 r_growth_direction_flag6=0;    //”“±ﬂ…˙≥§∑ΩœÚ35±Í÷æŒª
 
 uint8 right_lost_num=0;        //”“±ﬂ∂™œﬂ ˝
 uint8 left_lost_num=0;         //◊Û±ﬂ∂™œﬂ ˝
@@ -77,12 +99,18 @@ uint8 Lost_right_Flag3=0;        //”“±ﬂ∂™œﬂ±Í÷æ
 uint8 lost_point_L_scan_line;
 uint8 lost_point_R_scan_line;
 
+uint8 circle_flag;
+
 uint8 Circle_Begin_Flag = 0;        //ø¥º˚µ⁄“ª∏ˆπ’µ„
 uint8 Circle_Enter_Flag = 0;        //ø¥º˚ª∑µ∫£¨’“”“…œπ’µ„◊º±∏Ω¯ª∑
 uint8 Circle_Static_Flag = 0;
 uint8 roundabout_X=0;
 uint8 roundabout_Y=0;
 uint8 roundabout_Flag=0;
+
+uint8 middle_empty_dir = 1;
+uint8 middle_empty_start_line = 0;
+uint8 middle_empty_end_line = 0;
 
 int Endline = 1 ;           //Ωÿ÷π––
 
@@ -91,19 +119,19 @@ uint16 pro_time;            //¥¶¿Ì ±º‰
 int weight[120]=
 {
 
-0,0,0,0,0,0,0,0,0,0,//21-30
-0,0,0,0,0,0,0,0,0,0,//0-10
+
 0,0,0,0,0,0,0,0,0,0,//11-20
 2,2,2,2,2,2,2,2,2,2,//101-110
 2,2,2,2,2,2,2,2,2,2,//111-120
 2,2,2,2,2,2,2,2,2,2,//30-40
-8,8,8,8,8,8,8,8,8,8,//81-90
 7,7,7,7,7,7,7,7,7,7,//61-70
+8,8,8,8,8,8,8,8,8,8,//81-90
 25,25,25,25,25,25,25,25,25,25,//71-80
-6,6,6,6,6,6,6,6,6,6,//51-60
+6,6,6,6,6,6,12,12,12,12,//51-60
 4,4,4,4,4,4,4,4,4,4,//91-100
 4,4,4,4,4,4,4,4,4,4,//40-50
-
+0,0,0,0,0,0,0,0,0,0,//21-30
+0,0,0,0,0,0,0,0,0,0,//0-10
 
 
 
@@ -151,9 +179,9 @@ void MyCamera_Show(void)
           //  middle[i] = (left[i] + right[i]) >> 1;//«Û÷–œﬂ
           //«Û÷–œﬂ◊Ó∫√◊Ó∫Û«Û£¨≤ªπ‹ «≤πœﬂªπ «◊ˆ◊¥Ã¨ª˙£¨»´≥Ã◊Ó∫√ π”√“ª◊È±ﬂœﬂ£¨÷–œﬂ◊Ó∫Û«Û≥ˆ£¨≤ªƒ‹∏…»≈◊Ó∫Ûµƒ ‰≥ˆ
           //µ±»ª“≤”–∂‡◊È±ﬂœﬂµƒ’“∑®£¨µ´ «∏ˆ»À∏–æı∫‹∑±Àˆ£¨≤ªΩ®“È
-            ips200_draw_point((uint16)middle[i], (uint16)i,  RGB565_GREEN);
-            ips200_draw_point((uint16)left[i], (uint16)i, RGB565_RED);
-            ips200_draw_point((uint16)right[i],(uint16) i, RGB565_BLUE);
+            ips200_draw_point((uint16)middle_copy[i], (uint16)i,  RGB565_GREEN);
+            ips200_draw_point((uint16)left_copy[i], (uint16)i, RGB565_RED);
+            ips200_draw_point((uint16)right_copy[i],(uint16) i, RGB565_BLUE);
         }
 //        seekfree_assistant_camera_send();
     }
@@ -467,8 +495,8 @@ void Search_Line_BLY(uint16 break_flag, uint8(*image)[image_w], uint16 *l_stasti
         uint8 center_point_l[2] = {  0 };
         uint16 l_data_statics;//Õ≥º∆◊Û±ﬂ
         //∂®“Â∞À∏ˆ¡⁄”Ú
-//        static int8 seeds_l[8][2] = { {0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0},{1,1} };
-        static int8 seeds_l[8][2] = { {-1,0}, {-1,-1}, {0,-1}, {1,-1}, {+1,0}, {1,1}, {0,1}, {-1,1} };
+        static int8 seeds_l[8][2] = { {0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1},{1,0},{1,1} };
+//        static int8 seeds_l[8][2] = { {-1,0}, {-1,-1}, {0,-1}, {1,-1}, {+1,0}, {1,1}, {0,1}, {-1,1} };
         //{-1,-1},{0,-1},{+1,-1},
         //{-1, 0},       {+1, 0},
         //{-1,+1},{0,+1},{+1,+1},
@@ -481,8 +509,8 @@ void Search_Line_BLY(uint16 break_flag, uint8(*image)[image_w], uint16 *l_stasti
         uint8 temp_r[8][2] = { {  0 } };
         uint16 r_data_statics;//Õ≥º∆”“±ﬂ
         //∂®“Â∞À∏ˆ¡⁄”Ú
-//        static int8 seeds_r[8][2] = { {0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1},{-1,0},{-1,1}, };
-        static int8 seeds_r[8][2] = { {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1} };
+        static int8 seeds_r[8][2] = { {0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1},{-1,0},{-1,1}, };
+//        static int8 seeds_r[8][2] = { {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1} };
 //        static int8 seeds_l[8][2] = { {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1} };
 //        static int8 seeds_r[8][2] = { {-1,0}, {-1,-1}, {0,-1}, {1,-1}, {+1,0}, {1,1}, {0,1}, {-1,1} };
         //{-1,-1},{0,-1},{+1,-1},
@@ -632,6 +660,152 @@ void Search_Line_BLY(uint16 break_flag, uint8(*image)[image_w], uint16 *l_stasti
         //»°≥ˆ—≠ª∑¥Œ ˝
         *l_stastic = l_data_statics;
         *r_stastic = r_data_statics;
+}
+/*=======================================Ω¯––…˙≥§∑Ω∏ˆ ˝Ã·»°========================================================*/
+uint8 r1=0,r2=0,r3=0,r4=0,r5=0,r6=0,r7=0,r8=0;
+uint8 l1=0,l2=0,l3=0,l4=0,l5=0,l6=0,l7=0,l8=0;
+void Growth_Direction(void)
+{
+    uint16 i;
+    r1=0;
+    r2=0;
+    r3=0;
+    r4=0;
+    r5=0;
+    r6=0;
+    r7=0;
+    r8=0;
+
+    l1=0;
+    l2=0;
+    l3=0;
+    l4=0;
+    l5=0;
+    l6=0;
+    l7=0;
+    l8=0;
+
+    /*===«Â¡„===*/
+    left_2_growth_direction=0;
+    right_2_growth_direction=0;
+    left_5_growth_direction=0;
+    right_5_growth_direction=0;
+    left_3_growth_direction=0;
+    right_6_growth_direction=0;
+    left_6_growth_direction=0;
+    right_3_growth_direction=0;
+    /*===◊Û±ﬂÃ·»°…˙≥§∑ΩœÚ∏ˆ ˝===*/
+    for(i=0;i<=data_stastics_l;i++)
+    {
+        if(dir_l[i]==2)
+            left_2_growth_direction++;
+        if(dir_l[i]==5)
+            left_5_growth_direction++;
+        if(dir_l[i]==3)
+            left_3_growth_direction++;
+        if(dir_l[i]==1)
+            l1++;
+        if(dir_l[i]==2)
+            l2++;
+        if(dir_l[i]==3)
+            l3++;
+        if(dir_l[i]==4)
+            l4++;
+        if(dir_l[i]==5)
+            l5++;
+        if(dir_l[i]==6)
+        {
+            l6++;
+            left_6_growth_direction++;
+        }
+        if(dir_l[i]==7)
+            l7++;
+        if(dir_l[i]==0)
+            l8++;
+    }
+    /*===”“±ﬂÃ·»°…˙≥§∑ΩœÚ∏ˆ ˝===*/
+    for(i=0;i<=data_stastics_r;i++)
+    {
+        if(dir_r[i]==2)
+          right_2_growth_direction++;
+        if(dir_r[i]==5)
+          right_5_growth_direction++;
+        if(dir_r[i]==3)
+          right_3_growth_direction++;
+        if(dir_r[i]==1)
+            r1++;
+        if(dir_r[i]==2)
+            r2++;
+        if(dir_r[i]==3)
+            r3++;
+        if(dir_r[i]==4)
+            r4++;
+        if(dir_r[i]==5)
+            r5++;
+        if(dir_r[i]==6)
+        {
+            r6++;
+            right_6_growth_direction++;
+        }
+        if(dir_r[i]==7)
+            r7++;
+        if(dir_r[i]==0)
+            r8++;
+    }
+
+
+    /*◊Û±ﬂ≈–∂œ*/
+    if(left_2_growth_direction>20&&left_5_growth_direction>20)
+    {
+        l_growth_direction_flag=1;
+    }
+    else
+    {
+        l_growth_direction_flag=0;
+    }
+    if(left_3_growth_direction>20&&left_5_growth_direction>20)
+    {
+        l_growth_direction_flag35=1;
+    }
+    else
+    {
+        l_growth_direction_flag35=0;
+    }
+    if(left_6_growth_direction>25)
+    {
+        l_growth_direction_flag6=1;
+    }
+    else
+    {
+        l_growth_direction_flag6=0;
+    }
+
+
+    /*”“±ﬂ≈–∂œ*/
+    if(right_2_growth_direction>20&&right_5_growth_direction>20)
+    {
+        r_growth_direction_flag=1;
+    }
+    else
+    {
+        r_growth_direction_flag=0;
+    }
+    if(right_3_growth_direction>20&&right_5_growth_direction>20)
+    {
+        r_growth_direction_flag35=1;
+    }
+    else
+    {
+        r_growth_direction_flag35=0;
+    }
+    if(right_6_growth_direction>25)
+    {
+        r_growth_direction_flag6=1;
+    }
+    else
+    {
+        r_growth_direction_flag6=0;
+    }
 }
 
 float absolute(float z)
@@ -818,6 +992,18 @@ void Lost_Left(void)
 ************************************************/
 int Camera_Get_MidErr(void)
 {
+
+#if(MIDDLE_LINE_MODE == 1)
+    int i;
+    int err_sum = 0, err = 0;
+    for(i=55;i < 95; i++)
+    {
+        err_sum += middle_copy[i] ;
+    }
+    err = err_sum / 40;
+    return err;
+#endif
+#if(MIDDLE_LINE_MODE == 2)
     int i;
     int weight_sum=0;
     for(i=119;i >= 0;i--)
@@ -830,6 +1016,7 @@ int Camera_Get_MidErr(void)
     }
     camera_miderr /= weight_sum;
     return camera_miderr;
+#endif
 }
 /***********************************************
 * @brief : ◊Ûœ¬’“π’µ„
@@ -841,8 +1028,8 @@ int Camera_Get_MidErr(void)
 void Lower_left(void)
 {
     lower_left_inflection_Flag=0;
-    lower_left_inflection_X =0;
-    lower_left_inflection_Y =0;
+    lower_left_inflection_X =3;
+    lower_left_inflection_Y =105;
 
         for(y=image_h-3;y>Endline+10;y--)
         {
@@ -896,7 +1083,7 @@ void Lower_right(void)
 * @param : void
 * @return: void
 * @date  : 2024ƒÍ10‘¬29»’22:27:55
-* @author: —œΩ®≥ø
+* @author: SJX
 ************************************************/
 void Upper_left(void)
 {
@@ -904,22 +1091,20 @@ void Upper_left(void)
     upper_left_inflection_flag=0;
     upper_left_inflection_X =0;
     upper_left_inflection_Y =0;
-    if(Lost_left_Flag==1)
-    {
-
-          //’‚ «≥£πÊµƒ’“…œπ’µ„
-              for(h=lost_point_L_scan_line+3;h>(Endline+10);h--)
-              {
-                if((left[h]-left[h+4])>3&&left[h+10]==2&&left[h]!=2&&(left[h-1]-left[h])<3&&h<60&&left[h]>10)
-                {
-//                        uart_write_string(UART_2, "Find_Upper_Left\r\n");
-                       upper_left_inflection_flag=1;
-                       upper_left_inflection_X =(uint8)left[h];
-                       upper_left_inflection_Y =h;
-                       return;
-                }
-             }
-    }
+//    if(Lost_left_Flag==1)
+//    {
+        for(h=4;h<50;h++)
+        {
+            if((left[h-2] - left[h] < 6 ) && (left[h] - left[h+2]) < 6 && (left[h] - left[h+10] > 20 ))
+            {
+            //                        uart_write_string(UART_2, "Find_Upper_Left\r\n");
+                   upper_left_inflection_flag=1;
+                   upper_left_inflection_X =(uint8)left[h+5];
+                   upper_left_inflection_Y =h+5;
+                   return;
+            }
+        }
+//    }
 
 }
 /***********************************************
@@ -927,7 +1112,7 @@ void Upper_left(void)
 * @param : void
 * @return: void
 * @date  : 2024ƒÍ10‘¬29»’22:32:44
-* @author: —œΩ®≥ø
+* @author: SJX
 ************************************************/
 void Upper_right(void)
 {
@@ -937,20 +1122,50 @@ void Upper_right(void)
     upper_right_inflection_Y =0;
     if(Lost_right_Flag==1)
     {
-        for(h=lost_point_R_scan_line+5;h>(Endline+10);h--)
+        for(h=4;h<50;h++)
         {
-
-            if((right[h+3]-right[h])>15&&right[h+10]==185&&right[h]!=185&&(right[h]-right[h-1])<3&&h<60&&right[h]<177)
+            if((right[h-2] - right[h] < 6 ) && (right[h] - right[h+2]) < 6 && (right[h] - right[h+10] > 20 ))
             {
-                upper_right_inflection_flag=1;
-                upper_right_inflection_X =(uint8)right[h];
-                upper_right_inflection_Y =h;
-                return;
+            //                        uart_write_string(UART_2, "Find_Upper_Left\r\n");
+                   upper_right_inflection_flag=1;
+                   upper_right_inflection_X =(uint8)right[h+5];
+                   upper_right_inflection_Y =h+5;
+                   return;
             }
         }
     }
 }
 
+/***********************************************
+* @brief : ‘≤ª∑”“…œ’“π’µ„
+* @param : void
+* @return: void
+* @date  : 2024ƒÍ11‘¬7»’18:44:38
+* @author: SJX
+************************************************/
+void Circle_Upper_right(void)
+{
+    uint8 h=image_h-3;
+    circle_upper_right_inflection_flag=0;
+    circle_upper_right_inflection_X =0;
+    circle_upper_right_inflection_Y =0;
+//    if(Lost_right_Flag==1)
+//    {
+        for(h=8;h<90;h++)
+        {
+//            if((right[h-2] - right[h] < 6 ) && (right[h] - right[h+2]) < 6 && (right[h] - right[h+10] > 20 ))
+            if((right[h] - right[h-3])<0 && (right[h-3] - right[h-6])<0
+                    && (right[h] - right[h+3])<0 && (right[h+3] - right[h+6])<0)
+            {
+            //                        uart_write_string(UART_2, "Find_Upper_Left\r\n");
+                circle_upper_right_inflection_flag=1;
+                circle_upper_right_inflection_X =(uint8)right[h+5];
+                circle_upper_right_inflection_Y =h+5;
+                   return;
+            }
+        }
+//    }
+}
 /***********************************************
 * @brief : π’µ„◊‹∂œ
 * @param : void
@@ -965,6 +1180,60 @@ void Inflection_Point(void)
     Upper_left();
     Upper_right();
 }
+/***********************************************
+* @brief : ÷–œﬂ«Âø’
+* @param : void
+* @return: void
+* @date  : 2024ƒÍ11‘¬7»’19:03:27
+* @author: SJX
+* @note  : ∆ º––‘⁄÷’÷π––µƒœ¬∑Ω£¨¥”œ¬Õ˘…œÀ¢£¨π ∆ º––◊¯±Í ˝÷µ±»÷’÷π––¥Û
+************************************************/
+void Middle_Empty(void)
+{
+    if(middle_empty_start_line < middle_empty_end_line)
+    {
+        uint8 tmp;
+        tmp = middle_empty_start_line;
+        middle_empty_start_line = middle_empty_end_line;
+        middle_empty_end_line = tmp;
+    }
+    uint8 i;
+    if(middle_empty_dir == 0)
+    {
+        return;
+    }
+    else if(middle_empty_dir == 1)
+    {
+        for(i = middle_empty_start_line; i > middle_empty_end_line; i-- )
+        {
+            middle_copy[i] = 2;
+        }
+    }
+    else
+    {
+        for(i = middle_empty_start_line; i > middle_empty_end_line; i-- )
+        {
+            middle_copy[i] = 185;
+        }
+    }
+    Middle_Empty_Set(0, 1, 1);
+}
+/***********************************************
+* @brief : ÷–œﬂ«Âø’…Ë÷√
+* @param : void
+* @return: dir ∑ΩœÚ  0Õ£÷π  1◊Û  2”“
+*          start_line ∆ º––
+*          end_line ÷’÷π––
+* @date  : 2024ƒÍ11‘¬7»’19:03:27
+* @author: SJX
+* @note  : ∆ º––‘⁄÷’÷π––µƒœ¬∑Ω£¨¥”œ¬Õ˘…œÀ¢£¨π ∆ º––◊¯±Í ˝÷µ±»÷’÷π––¥Û
+************************************************/
+void Middle_Empty_Set(uint8 dir, uint8 start_line , uint8 end_line)
+{
+    middle_empty_dir = dir;
+    middle_empty_start_line = start_line;
+    middle_empty_end_line = end_line;
+}
 
 /***********************************************
 * @brief : ’“‘≤ª∑
@@ -975,38 +1244,162 @@ void Inflection_Point(void)
 ************************************************/
 void Find_Circle(void)
 {
-//    printf("%d, %d\r\n",lower_right_inflection_X, lower_right_inflection_Y);
-    //”“‘≤ª∑
-    if(Circle_Static_Flag == 1 || (left_straight_flag == 1 && lower_right_inflection_Flag == 1 && roundabout_Flag == 0 && Circle_Static_Flag == 0))
-//        if(Circle_Static_Flag == 1 || (lower_left_inflection_Flag == 0 && lower_right_inflection_Flag == 1 && Circle_Static_Flag == 0 && roundabout_Flag == 0))
+    static uint16 circle_lost_cnt = 0;
+    static uint16 circle_process_cnt = 0;
+    static uint16 circle_out_cnt = 0;
+    if((left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 0 && Lost_right_Flag == 0)
+                || cross_road_flag == 2 )
+    //        && (Circle_Static_Flag <= 2 || Circle_Static_Flag >= 5))
+        {
+            circle_lost_cnt++;
+            if(circle_lost_cnt >= 10)
+            {
+                circle_lost_cnt = 0;
+                circle_process_cnt = 0;
+                uart_write_string(UART_0, "Circle_OUT\r\n");
+                Circle_Static_Flag = 0;
+                circle_flag = 0;
+                Middle_Empty_Set(0, 40, 2);
+//                return ;
+            }
+
+        }
+    if(circle_process_cnt > 30 || circle_out_cnt > 45 )
     {
-        Slope_Adding_Line(2, lower_right_inflection_X, lower_right_inflection_Y);
-//        uart_write_string(UART_2, "Find_Right_Circle\r\n");
-        Circle_Static_Flag = 1;
-        Right_Roundabout();
+        circle_out_cnt = 0;
+        circle_process_cnt = 0;
+        uart_write_string(UART_0, "Circle_OUT\r\n");
+        Circle_Static_Flag = 0;
+        circle_flag = 0;
+        Middle_Empty_Set(0, 40, 2);
+//        return ;
     }
-    //◊Û‘≤ª∑
-    else if((lower_left_inflection_Flag == 1 && lower_right_inflection_Flag == 0 && Circle_Static_Flag == 0 && roundabout_Flag == 0))
+//    memcpy(left_tmp[0], left[0], 120);
+//    printf("%d, %d\r\n",lower_right_inflection_X, lower_right_inflection_Y);
+//    //”“‘≤ª∑
+//    if(Circle_Static_Flag == 1 || (left_straight_flag == 1 && lower_right_inflection_Flag == 1 && roundabout_Flag == 0 && Circle_Static_Flag == 0))
+////        if(Circle_Static_Flag == 1 || (lower_left_inflection_Flag == 0 && lower_right_inflection_Flag == 1 && Circle_Static_Flag == 0 && roundabout_Flag == 0))
+//    {
+//        Slope_Adding_Line(2, lower_right_inflection_X, lower_right_inflection_Y);
+//        uart_write_string(UART_2, "Find_Right_Circle\r\n");
+//        Circle_Static_Flag = 1;
+//        Right_Roundabout();
+//    }
+//    //◊Û‘≤ª∑
+
+    if(Circle_Static_Flag == 1 || (upper_right_inflection_flag == 0 && lower_left_inflection_Flag == 1 && lower_right_inflection_Flag == 0 && Circle_Static_Flag == 0 ))
     {
-        Slope_Adding_Line(1, lower_left_inflection_X, lower_left_inflection_Y);
-//        uart_write_string(UART_2, "Find_Left_Circle\r\n");
-        Circle_Static_Flag = 1;
+
+//        Slope_Adding_Line(1, lower_left_inflection_X, lower_left_inflection_Y);
+//        Appoint_Adding_Line(1, , 95,79, 5);
+        Appoint_Adding_Line(1, 79, 5,5, 95);
+        uart_write_string(UART_0, "Find_Left_Circle\r\n");
+        circle_flag = 0;
         Left_Roundabout();
+        Circle_Static_Flag = 1;
+        circle_process_cnt++;
+        if((roundabout_Y > 25 && roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
+        {
+            circle_process_cnt = 0;
+            circle_flag = 0;
+            Circle_Static_Flag = 2;
+        }
     }
     //”“ª∑µ∫
-    if((roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
-    {
-        Right_Roundabout();
-        Circle_Static_Flag = 2;
+//    if((roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
+//    {
+//        Right_Roundabout();
+//        Circle_Static_Flag = 2;
 //        uart_write_string(UART_2, "Find_Right_RD\r\n");
-//        Beep_ShortRing();
-        Appoint_Adding_Line(2, 187, 120,roundabout_X, roundabout_Y);
+////        Beep_ShortRing();
+//        Appoint_Adding_Line(2, 3, 117,roundabout_X, roundabout_Y);
+//    }
+    //◊Ûª∑µ∫
+    if(Circle_Static_Flag == 2)
+        {
+            circle_process_cnt++;
+            Left_Roundabout();
+            uart_write_string(UART_0, "Find_Left_RD\r\n");
+    //        Beep_ShortRing();
+//            Appoint_Adding_Line(1, 187, 120,roundabout_X, roundabout_Y);
+            Appoint_Adding_Line(1, 79, 5,5, 95);
+            if(upper_left_inflection_flag == 1 && roundabout_Y > 42 && (roundabout_Y - upper_left_inflection_Y  ) > 20)
+            {
+                circle_process_cnt = 0;
+                Circle_Static_Flag = 3;
+                circle_flag = 1;
+            }
+        }
+    //¿≠œﬂ»Îª∑
+    if(Circle_Static_Flag == 3)
+    {
+        circle_process_cnt++;
+//        Appoint_Adding_Line(2, upper_left_inflection_X, upper_left_inflection_Y, right[32], 68);
+        Appoint_Adding_Line(2, 27, 19, right[80], 80);
+        Middle_Empty_Set(1, 24, 2);
+        Left_Roundabout();
+        uart_write_string(UART_0, "Find_Left_Upper\r\n");
+        if(roundabout_Flag == 0 && upper_left_inflection_flag == 0 && left_straight_flag == 1 && right_straight_flag == 0)
+        {
+            circle_process_cnt = 0;
+            Circle_Static_Flag = 4;
+        }
     }
-    Right_Roundabout();
-//    printf("%d, %d, %d\r\n",lost_point_L_scan_line, lost_point_R_scan_line, Lost_left_Flag);
+    //“—æ≠»Îª∑◊º±∏≥ˆª∑
+    if(Circle_Static_Flag == 4)
+    {
+        uart_write_string(UART_0, "Find_IN\r\n");
+        Circle_Upper_right();
+        if(circle_upper_right_inflection_flag == 1)
+        {
+            Circle_Static_Flag = 5;
+            circle_process_cnt = 0;
+            circle_out_cnt = 0;
+        }
+    }
+    if(Circle_Static_Flag == 5)
+    {
+        Circle_Upper_right();
+        circle_out_cnt++;
+        if(circle_upper_right_inflection_flag == 1)
+        {
+            Appoint_Adding_Line(2, 2, 24, circle_upper_right_inflection_X, circle_upper_right_inflection_Y);
+//            middle_empty_start_line = circle_upper_right_inflection_Y;
+//            middle_empty_end_line = 2;
+            Middle_Empty_Set(1, circle_upper_right_inflection_Y, 2);
+//            Middle_Empty(1, circle_upper_right_inflection_Y, 2);
+        }
+        else
+        {
+            Appoint_Adding_Line(2, 2, 24, right[90], 90);
+            Middle_Empty_Set(1, 40, 2);
+//            Middle_Empty(1, 40, 2);
+        }
+    }
+
+
+
+
+//    if(Lost_left_Flag == 0 && )
+//    double a[2], b[2], c[2];
+//    a[0] = left[5];
+//    a[1] = 5;
+//    b[0] = left[15];
+//    b[1] = 15;
+//    c[0] = left[20];
+//    c[1] = 20;
+//    rd_calculate = curvature(a, b, c);
+
+//    ips200_show_float(50, 18*5, tmp, 4, 6);
+//    printf("%f\r\n", tmp);
+//    Right_Roundabout();
+//    printf("%d, %d, %d, %d\r\n",left_straight_flag, right_straight_flag, Lost_left_Flag, Lost_right_Flag);
+//    printf("%d, %d, %d, %d\r\n",roundabout_X, roundabout_Y, upper_left_inflection_Y, lower_left_inflection_Y);
+//    printf("%d, %d, %d\r\n",circle_upper_right_inflection_flag, circle_upper_right_inflection_X, circle_upper_right_inflection_Y);
 //    printf("%d, %d, %d, %d, %d \r\n",left_straight_flag, right_straight_flag, lower_left_inflection_Flag,lower_right_inflection_Flag,roundabout_Flag);
 //    Right_Roundabout();
-//    printf("%d \r\n",roundabout_Flag);
+
+    printf("%d, %d, %d, %d, %d, %d, %d\r\n",Circle_Static_Flag, cross_road_flag, Circle_Static_Flag, cross_road_status, circle_process_cnt, circle_lost_cnt, circle_out_cnt);
 //    printf("%d, %d, %d, %d\r\n",roundabout_Flag, Circle_Static_Flag, lower_right_inflection_Flag,Circle_Enter_Flag);
 //    uart_write_byte(UART_2, roundabout_Flag);
 
@@ -1025,8 +1418,10 @@ void Left_Roundabout(void)
     roundabout_X=0;
     roundabout_Y=0;
     roundabout_Flag=0;
-    for(y=image_h-3;y>10;y--){
-        if((left[y]-left[y-8]) > 5 && (left[y]-left[y+2])<5 )
+//    for(y=0+10;y<lower_right_inflection_Y-6;y++)
+    for(y=50;y>15;y--)
+    {
+        if((left[y]-left[y-8]) > 2 && (left[y]-left[y+2])<10 && right_straight_flag == 1 && Lost_left_Flag == 1 && (lower_left_inflection_Y - y) > 20)
         {
             y+=4;
             roundabout_Flag=1;
@@ -1034,6 +1429,14 @@ void Left_Roundabout(void)
             roundabout_Y =(uint8)y;
             return;
         }
+//        if((left_tmp[y]-left_tmp[y-8]) > 2 && (left_tmp[y]-left_tmp[y+2])<10 && right_straight_flag == 1 && Lost_left_Flag == 1)
+//        {
+//            y+=4;
+//            roundabout_Flag=1;
+//            roundabout_X =(uint8)left_tmp[y];
+//            roundabout_Y =(uint8)y;
+//            return;
+//        }
      }
 }
 /***********************************************
@@ -1068,19 +1471,30 @@ void Right_Roundabout(void)
 * @date  : 2024ƒÍ10‘¬28»’19:08:58
 * @author: SJX Copy
 ************************************************/
-
+float l_k = 0;
 void Left_Straight(void)
 {
     float k1,k2;
     left_straight_flag = 0;
     float l_slope2=0,l_slope3=0,l_distance2=0,l_distance3=0;
-    caculate_distance(40,80,left,&l_slope3,&l_distance3);
+    caculate_distance(25,80,left,&l_slope3,&l_distance3);
     k2=l_slope3;
-    caculate_distance(30,50,left,&l_slope2,&l_distance2);
-    k1=l_slope2;
-    if(absolute(k1-k2)<0.1)
-        left_straight_flag = 1;
+//    caculate_distance(30,40,left,&l_slope2,&l_distance2);
+//    k1=l_slope2;
+//    if(absolute(k1-k2)<0.8)
+////        left_straight_flag = 1;
 //    l_k=absolute(k1-k2);
+    if(k2 <= 0.95)
+    {
+        left_straight_flag = 1;
+    }
+//    printf("%f\r\n",k2);
+//        float k1,k2=0;
+//        left_straight_flag = 0;
+//        float l_slope2=0,l_slope3=0,l_distance2=0,l_distance3=0;
+//        caculate_distance(4,80,left,&l_slope3,&l_distance3);
+//        k2=l_slope3;
+//        printf("%d\r\n",k2);
 }
 /***********************************************
 * @brief : ”“÷±œﬂ
@@ -1089,18 +1503,24 @@ void Left_Straight(void)
 * @date  : 2024ƒÍ10‘¬28»’19:10:17
 * @author: SJX Copy
 ************************************************/
+float r_k = 0;
 void Right_Straight(void)
 {
         float k1,k2;
         right_straight_flag=0;
         float l_slope2=0,l_slope3=0,l_distance2=0,l_distance3=0;
-        caculate_distance(80,100,right,&l_slope3,&l_distance3);
+        caculate_distance(25,80,right,&l_slope3,&l_distance3);
         k2=l_slope3;
-        caculate_distance(30,50,right,&l_slope2,&l_distance2);
-        k1=l_slope2;
-        if(absolute(k1-k2)<0.3)
-            right_straight_flag=1;
+//        caculate_distance(5,50,right,&l_slope2,&l_distance2);
+//        k1=l_slope2;
+//        if(absolute(k1-k2)<0.3)
+//            right_straight_flag=1;
 //        r_k=absolute(k1-k2);
+        if(k2 <= 0.96)
+        {
+            right_straight_flag = 1;
+        }
+
 }
 
 
@@ -1128,12 +1548,12 @@ void Slope_Adding_Line( uint8 choice, uint8 startX, uint8 startY)    //ø¥µΩπ’µ„—
             k = (float)(((float)left[lower_left_inflection_Y+1] - (float)left[lower_left_inflection_Y+5]) /(-4));
             b = (float)((float)left[lower_left_inflection_Y+5]- (float)(lower_left_inflection_Y+5) * k);
 
-            for(y = startY; y >(Endline+20); y--)
+            for(y = startY; y >(Endline); y--)
             {
                 temp = (int)(k* y + b);
                 if(temp<180&&temp>10)
                 {
-                    left[y]=temp;
+//                    left[y]=temp;
                     left_copy[y]=temp;
                 }
             }
@@ -1150,7 +1570,7 @@ void Slope_Adding_Line( uint8 choice, uint8 startX, uint8 startY)    //ø¥µΩπ’µ„—
                 temp = (int)(k* y + b);
                 if(temp<180&&temp>10)
                 {
-                    right[y]=temp;
+//                    right[y]=temp;
                     right_copy[y]=temp;
                 }
            }
@@ -1185,19 +1605,19 @@ void Appoint_Adding_Line( uint8 choice, uint8 startX, uint8 startY, uint8 endX, 
             {
                 if( (uint8)(k * y + b)>185)
                 {
-                    left[y] = 185;
+//                    left[y] = 185;
                     left_copy[y] = 185;
                 }
 
                 else if( (uint8)(k * y + b)<2)
                 {
-                    left[y] = 2;
+//                    left[y] = 2;
                     left_copy[y] = 2;
                 }
 
                 else
                 {
-                    left[y] = (k * y + b);
+//                    left[y] = (k * y + b);
                     left_copy[y] = (k * y + b);
                 }
             }
@@ -1211,19 +1631,19 @@ void Appoint_Adding_Line( uint8 choice, uint8 startX, uint8 startY, uint8 endX, 
             {
                 if( (uint8)(k * y + b)>185)
                 {
-                    right[y]=185;
+//                    right[y]=185;
                     right_copy[y]=185;
                 }
 
                 else if ( (uint8)(k * y + b)<2)
                 {
-                    right[y]=2;
+//                    right[y]=2;
                     right_copy[y]=2;
                 }
 
                 else
                 {
-                    right[y]= (k * y + b);
+//                    right[y]= (k * y + b);
                     right_copy[y]= (k * y + b);
                 }
             }
@@ -1237,6 +1657,7 @@ void Appoint_Adding_Line( uint8 choice, uint8 startX, uint8 startY, uint8 endX, 
 * @return: void
 * @date  : 2024ƒÍ10‘¬31»’18:36:40
 * @author: SJX
+* @notes : √ª”–º”»Î≤π,≤ª≤πœﬂ±»≤πœﬂ∫√£¨≥ˆ»•æ≠≥£”–∂´Œ˜ø¥≤ªµΩ
 ************************************************/
 void Cross_Road(void)
 {
@@ -1265,6 +1686,7 @@ void Cross_Road(void)
         {
            cross_road_flag=1;
            cross_road_status=1;
+//           uart_write_string(UART_0, "Find_Cross\r\n");
 //           Beep_Start();
         }
         if(cross_road_flag==1)
@@ -1272,8 +1694,10 @@ void Cross_Road(void)
             /*==================Ω¯ Æ◊÷¬∑ø⁄«∞Ω¯––≤πœﬂ(µ˜”√–±¬ Ωÿæ‡∫Ø ˝∫Õ◊Ó–°∂˛≥À∑®∫Ø ˝)=======================*/
             if(cross_road_status==1)
             {
-                Appoint_Adding_Line(1, left[lost_point_L_scan_line], lost_point_L_scan_line,78, 3);
-                Appoint_Adding_Line(2, right[lost_point_R_scan_line], lost_point_R_scan_line,117, 3);
+//                Appoint_Adding_Line(1, left[lost_point_L_scan_line], lost_point_L_scan_line,78, 3);
+//                Appoint_Adding_Line(2, right[lost_point_R_scan_line], lost_point_R_scan_line,117, 3);
+                Appoint_Adding_Line(1, 78, 3,left[lost_point_L_scan_line], lost_point_L_scan_line);
+                Appoint_Adding_Line(2, 117, 3,right[lost_point_R_scan_line], lost_point_R_scan_line);
 //                /*===◊Û±ﬂ≤πœﬂ===*/
 //                start=ten_inflexion_down_l+3;
 //                end=ten_inflexion_down_l+15;
@@ -1318,8 +1742,10 @@ void Cross_Road(void)
             /*============Ω¯ Æ◊÷¬∑ø⁄∫ÛΩ¯––≤πœﬂ(µ˜”√–±¬ Ωÿæ‡∫Ø ˝∫Õ◊Ó–°∂˛≥À∑®∫Ø ˝)===============*/
             if(cross_road_status==2)
             {
-                Appoint_Adding_Line(1, 5, 115,left[ten_inflexion_up_l], ten_inflexion_up_l);
-                Appoint_Adding_Line(2, 185, 115,right[ten_inflexion_up_l], ten_inflexion_up_r);
+//                Appoint_Adding_Line(1, 5, 115,left[ten_inflexion_up_l], ten_inflexion_up_l);
+//                Appoint_Adding_Line(2, 185, 115,right[ten_inflexion_up_l], ten_inflexion_up_r);
+                Appoint_Adding_Line(1,left[ten_inflexion_up_l] , ten_inflexion_up_l,5, 115);
+                Appoint_Adding_Line(2, right[ten_inflexion_up_l], ten_inflexion_up_r,185, 115);
                 /*===◊Û±ﬂ≤πœﬂ===*/
 //                start=ten_inflexion_up_l-13;
 //                end=ten_inflexion_up_l-3;
@@ -1373,7 +1799,8 @@ void Cross_Road(void)
                 {
                     cross_road_flag=0;
                     cross_road_status=0;
-                    Beep_Stop();
+//                    Beep_Stop();
+//                    uart_write_string(UART_0, "Cross_OUT\r\n");
                 }
             }
 
@@ -1470,17 +1897,18 @@ void Bend_Straight_Opinion(void)
     float k1,k2;
     float l_slope2=0,l_slope3=0,l_distance2=0,l_distance3=0;
     bend_straight_flag=0;
-    caculate_distance(100,119,middle,&l_slope3,&l_distance3);
+    caculate_distance(15,35,middle,&l_slope3,&l_distance3);
     k2=l_slope3;
 
-    caculate_distance(45,60,middle,&l_slope2,&l_distance2);
+    caculate_distance(45,80,middle,&l_slope2,&l_distance2);
     k1=l_slope2;
 
-    if((absolute(k1-k2)<0.15))//&&(Lost_left_Flag==0)&&(Lost_right_Flag==0)
+    if((absolute(k1-k2)<0.08))//&&(Lost_left_Flag==0)&&(Lost_right_Flag==0)
     bend_straight_flag=1;
     else
     bend_straight_flag=0;
     straight_k_err=absolute(k1-k2);
+//    printf("%f\r\n", straight_k_err);
 }
 /***********************************************
 * @brief : ∞ﬂ¬Ìœﬂ
@@ -1522,9 +1950,9 @@ void Zebra_Crossing(void)
         edge_sum = 0;
     if(edge_left_num > 200)
         edge_left_num = 0;
-    if(edge_sum >= 16)                      //Õ£≥µ
+    if(edge_sum >= 16 && edge_left_num > 5 && edge_right_num > 5)                      //Õ£≥µ
     {
-        system_delay_ms(150);
+        system_delay_ms(210);
         zebra_crossing_flag = 1;
         Car_Stop();
         Beep_ShortRing();
@@ -1545,14 +1973,14 @@ void Image_Process(void)
 
         Get_Image(mt9v03x_image);               //ÕºœÒ◊™‘ÿ 37ns“ª÷°
         Binaryzation();                 //∂˛÷µªØ       5.7ms“ª÷°
-        image_filter(image);            //≈Ú’Õ∏Ø ¥¬À≤®      10ms“ª÷°£ø£ø£ø£ø
+//        image_filter(image);            //≈Ú’Õ∏Ø ¥¬À≤®      10ms“ª÷°£ø£ø£ø£ø
         image_draw_rectan(image);       //ª≠∫⁄øÚ           20ns“ª÷°
         start_point_detection_flag = get_start_point(image_h - 2) ;         //’“±ﬂΩÁ∆µ„£¨25ns“ª÷°
         if(start_point_detection_flag)
         {
             //∞À¡Ï”Ú   ‘≤ª∑3ms“ª÷°  ÷±œﬂ1.8ms“ª÷°
             Search_Line_BLY((uint16)USE_num, image, &data_stastics_l, &data_stastics_r, start_point_l[0], start_point_l[1], start_point_r[0], start_point_r[1], &Endline);
-
+            Growth_Direction();
             get_left(data_stastics_l);    //◊Û±ﬂΩÁÃ·»°
             get_right(data_stastics_r);   //”“±ﬂΩÁÃ·»°
             Zebra_Crossing();
@@ -1569,13 +1997,17 @@ void Image_Process(void)
             Right_Straight();             //”“÷±œﬂ≈–∂œ
 
 //            Inflection_Point();           //∂œµ„◊‹∂œ
-//            Find_Circle();                  //’“‘≤ª∑
+            Find_Circle();                  //’“‘≤ª∑
 
             middle_line();                  //Ã·»°÷–œﬂ
+            Middle_Empty();
             Bend_Straight_Opinion();        //≈–∂œ «∑Ò «÷±œﬂ
-            g_camera_mid_err = Camera_Get_MidErr();
+//            g_camera_mid_err = Camera_Get_MidErr();
+//            printf("%d\r\n",g_camera_mid_err);
+//            printf("%d ,%d ,%d\r\n ",target_left,target_right,g_camera_mid_err);
             camera_process_cnt++;
             camera_process_cnt_show++;
+
         }
 //        pro_time = stop_time - start_time ;
         mt9v03x_finish_flag = 0;

@@ -8,6 +8,9 @@
 int target_left = 0,target_right = 0;          //左右轮的目标速度的值
 
 float V0 = 80;
+//float turn_V0 = 70;
+//float straight_V0 = 100;
+float basic_V0 = 120;
 int pwm_left = 0,pwm_right = 0;
 
 #if MOTOR_MODE == 0
@@ -83,7 +86,6 @@ void MotorSetPWM(int pwm_left,int pwm_right)
 ************************************************/
 void Motor_Init(void)
 {
-
     pwm_init(MOTOR_LEFT_1,12500,0);                   //初始化左电机
     pwm_init(MOTOR_LEFT_2,12500,0);
     pwm_init(MOTOR_RIGHT_1,12500,0);                  //初始化右电机
@@ -157,30 +159,63 @@ void Turn_Ctrl(void)
 {
 //    static int mid_err;
 ////    int middle_sum,middle_avg,speed_delta;
-    int speed_delta;
+    int speed_delta, basic_V0_delta;
 //    mid_err = Camera_Get_MidErr();
 
-    func_limit_ab(g_camera_mid_err,94,-94);
+//    func_limit_ab(g_camera_mid_err,94,-94);
+
 //    if(mid_err >= STRAIGHT_MAX_ERR)
 //    {
 //        speed_delta = Positional_PID(&Straight_Speed_PID,Target_Column,Target_Column - mid_err,100);
 //    }
 //    else
 //        speed_delta = Positional_PID(&Turn_Speed_PID,Target_Column,Target_Column - mid_err,100);
+//    if(bend_straight_flag == 1)
+//    {
+//        speed_delta = Positional_PID(&Turn_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 100);
+//        target_left = turn_V0 - speed_delta ;
+//        target_right = turn_V0 + speed_delta ;
+//    }
+//    else
+//    {
+//        speed_delta = Positional_PID(&Straight_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 100);
+//        target_left = straight_V0 - speed_delta ;
+//        target_right = straight_V0 + speed_delta ;
+//    }
+#if(MIDDLE_LINE_MODE == 1)
+    g_camera_mid_err = Camera_Get_MidErr();
+    if(g_camera_mid_err == 0)
+    {
+        g_camera_mid_err = 94;
+    }
+    g_camera_mid_err = Target_Column - g_camera_mid_err;
+#endif
+#if(MIDDLE_LINE_MODE == 2)
+    g_camera_mid_err = Camera_Get_MidErr();
 
-    speed_delta = Positional_PID(&Turn_Speed_PID,Target_Column,Target_Column - g_camera_mid_err,100);
+//    speed_delta = Positional_PID(&Turn_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 20);
+#endif
 
+    if(abs(Target_Column - g_camera_mid_err) < 3 )
+    {
+        g_camera_mid_err = 0;
+    }
+    speed_delta = Positional_PID(&Turn_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 10);
+    V0 = basic_V0 - (abs(g_camera_mid_err));
+    if(circle_flag == 1)
+    {
+//        V0 = 50;
+    }
     target_left = V0 - speed_delta ;
     target_right = V0 + speed_delta ;
-
     // 对 target_left 进行限幅
-    func_limit_ab(target_left, 800, -800);
+    func_limit_ab(target_left, 1800, -1800);
 
     // 对 target_right 进行限幅
-    func_limit_ab(target_right, 800, -800);
-//    ips200_show_int(0, 200, middle_avg, 3);
-    printf("%d,%d,%d\r\n",
-            g_camera_mid_err, target_left, target_right);
+    func_limit_ab(target_right, 1800, -1800);
+////    ips200_show_int(0, 200, middle_avg, 3);
+//    printf("%d,%d,%d\r\n",
+//            g_camera_mid_err, target_left, target_right);
 //    printf("%d\r\n",mid_err);
 
 }

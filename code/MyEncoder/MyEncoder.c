@@ -3,10 +3,10 @@
 int16 Encoder_speed_l = 0;
 int16 Encoder_speed_r = 0;
 
-int16 switch_encoder_num = 0;
-
-int16 switch_encoder_num_flag = 0;
-
+int switch_encoder_num = 0;
+int switch_encoder_change_num = 0;
+uint8 switch_encode_bring_flag;
+uint8 switch_encode_change_get_buff_flag = 0;                   //变化缓冲，谨防变化未用上就将变化值清零
 void MyEncoder_Init(void)
 {
     encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//左轮编码器
@@ -97,19 +97,99 @@ void GetSpeed(void)
     //JustFloat_Test();
 };
 
+/***********************************************
+* @brief : 获取旋转编码器值
+* @param : void
+* @return: void
+* @date  : 2024年11月6日12:23:25
+* @author: SJX
+************************************************/
 void Get_Switch_Num(void)
 {
-    int tmp;
-//    tmp = -Encoder_MTM(TIM3_ENCODER,3,0);
-    tmp = encoder_get_count(TIM3_ENCODER);
+    int tmp = 0;
+    static int encoder_cnt, timer_cnt, last_switch_encoder_num = 0;
+    timer_cnt = -My_Switch_encoder_get_count(TIM3_ENCODER);
     encoder_clear_count(TIM3_ENCODER);
-//    if(tmp != 0)
-//        switch_encoder_num_flag = 1;
+
+    if(abs(timer_cnt) < 4)
+    {
+        encoder_cnt += timer_cnt;
+    }
+    else
+    {
+        tmp = timer_cnt / 4;
         switch_encoder_num += tmp;
-//    if(switch_encoder_num_flag == 1 && switch_encoder_num % 4 == 0 && switch_encoder_num >= 4)
-//    {
-//        switch_encoder_num -= 3;
-//        switch_encoder_num_flag = 0;
-//    }
-//    printf("Test");
+        tmp = timer_cnt % 4;
+        encoder_cnt += tmp;
+    }
+    if(abs(encoder_cnt) >= 4)
+    {
+        tmp = encoder_cnt / 4;
+        switch_encoder_num += tmp;
+        tmp = encoder_cnt % 4;
+        encoder_cnt = 0;
+        encoder_cnt += tmp;
+    }
+//    printf("%d, %d, %d, %d\r\n", switch_encoder_change_num, switch_encode_change_get_buff_flag,
+//            last_switch_encoder_num, switch_encoder_num);
+    if((last_switch_encoder_num != switch_encoder_num ) && switch_encode_change_get_buff_flag == 0)
+    {
+        switch_encode_change_get_buff_flag = 1;
+        switch_encoder_change_num = switch_encoder_num - last_switch_encoder_num;
+        Beep_Timer_ShortRing();
+
+    }
+    else if((last_switch_encoder_num != switch_encoder_num )&& switch_encode_change_get_buff_flag == 1)
+    {
+        switch_encoder_change_num = switch_encoder_change_num + switch_encoder_num - last_switch_encoder_num;
+        Beep_Timer_ShortRing();
+    }
+    if((last_switch_encoder_num == switch_encoder_num ) && switch_encode_change_get_buff_flag == 0)
+    {
+        switch_encoder_change_num = 0;
+        Beep_Stop();
+    }
+    last_switch_encoder_num = switch_encoder_num;
+
+
+}
+/***********************************************
+* @brief : 旋转编码器获取函数，仅用于旋转编码器
+* @param : void
+* @return: void
+* @date  : 2024年11月6日12:26:53
+* @author: SJX
+************************************************/
+int16 My_Switch_encoder_get_count (encoder_index_enum encoder_n)
+{
+    int16 encoder_data = 0;
+    switch(encoder_n)
+    {
+        case TIM2_ENCODER: encoder_data = (int16)IfxGpt12_T2_getTimerValue(&MODULE_GPT120); break;
+        case TIM3_ENCODER: encoder_data = (int16)IfxGpt12_T3_getTimerValue(&MODULE_GPT120); break;
+        case TIM4_ENCODER: encoder_data = (int16)IfxGpt12_T4_getTimerValue(&MODULE_GPT120); break;
+        case TIM5_ENCODER: encoder_data = (int16)IfxGpt12_T5_getTimerValue(&MODULE_GPT120); break;
+        case TIM6_ENCODER: encoder_data = (int16)IfxGpt12_T6_getTimerValue(&MODULE_GPT120); break;
+        default: encoder_data = 0;
+    }
+    return encoder_data;
+}
+/***********************************************
+* @brief : 判断旋转编码器是否出现变化
+* @param : void
+* @return: uint8            1变化 0不变
+* @date  : 2024年11月6日12:27:38
+* @author: SJX
+************************************************/
+uint8 If_Switch_Encoder_Change(void)
+{
+    switch_encode_change_get_buff_flag = 0;
+    if(switch_encoder_change_num != 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }

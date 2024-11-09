@@ -184,7 +184,7 @@ void menu_Val_CFG(float *CFG_val, uint16 page_start_row, float basic_val )
     {
 //        printf("%d ,%d ,%d ,%d, %d, %d\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r,pwm_left, pwm_right);
         flush_flag = Key_IfEnter();
-        if(flush_flag == 1)
+        if(flush_flag == 1 || switch_encoder_change_num != 0)
         {
             if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
             {
@@ -243,17 +243,40 @@ void menu_Val_CFG(float *CFG_val, uint16 page_start_row, float basic_val )
                     switch (menu_Val_CFG_line)
                     {
                         case 1:
-                            *CFG_val -= basic_1;
+                            *CFG_val += basic_1;
                             break;
                         case 2:
-                            *CFG_val -= basic_10;
+                            *CFG_val += basic_10;
                             break;
                         case 3:
-                            *CFG_val -= basic_100;
+                            *CFG_val += basic_100;
                             break;
                     }
                 }
 
+             }
+            if(If_Switch_Encoder_Change() == 1)
+            {
+                if(based_flag == 0)
+                {
+                    menu_Val_CFG_line += switch_encoder_change_num;
+                    menu_Val_CFG_Limit(&menu_Val_CFG_line, LINE_MAX);
+                }
+                else
+                {
+                    switch (menu_Val_CFG_line)
+                   {
+                       case 1:
+                           *CFG_val += (basic_1 * switch_encoder_change_num);
+                           break;
+                       case 2:
+                           *CFG_val += basic_10 * switch_encoder_change_num;
+                           break;
+                       case 3:
+                           *CFG_val += basic_100 * switch_encoder_change_num;
+                           break;
+                   }
+                }
             }
             menu_Val_CFG_Flush(CFG_val, page_start_row, based_flag);
             Beep_ShortRing();
@@ -415,4 +438,23 @@ void menu_Set_CFG_Value_Toggle(uint8 *value)
         *value = 0;
     else
         *value = 1;
+}
+
+/***********************************************
+* @brief : 菜单选择行数刷新
+* @param : void
+* @return: line_num 行的地址，因使用了记忆行数，所以需要地址传入
+* @date  : 2024年11月6日13:12:04
+* @author: SJX
+* @exp   ：Line_Num_Flush(&line_number);
+************************************************/
+void Line_Num_Flush(int8 *line_num)
+{
+//    if(If_Switch_Encoder_Change() == 1)
+    if(switch_encoder_change_num != 0)
+    {
+        *line_num += switch_encoder_change_num;
+        pagelimit(&*line_num,line_number_max);
+    }
+    switch_encode_change_get_buff_flag = 0;
 }

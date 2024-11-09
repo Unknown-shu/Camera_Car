@@ -80,5 +80,6 @@ void menu_Val_CFG_Limit(uint16 *line, uint16 line_max);
 void menu_Val_CFG_Arrow_Show(uint16 page_start_row,uint16 line_num);
 void menu_Set_CFG_OpenClose_Show(uint16 page_start_row, uint8 value);
 void menu_Set_CFG_Value_Toggle(uint8 *value);
+void Line_Num_Flush(int8 *line_num);
 
 #endif /* CODE_CPU2_MENU_CORE_MENU_H_ */

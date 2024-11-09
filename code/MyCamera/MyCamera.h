@@ -12,6 +12,8 @@
 #define Border_Min  1
 #define Target_Column 94
 #define STRAIGHT_MAX_ERR  30              //超过指定误差就认为是弯道
+
+extern float rd_calculate;
 extern uint8 bend_straight_flag;
 extern uint8 Camera_process_finish_flag;
 extern uint8 Camera_Wifi_Image_Send_Flag ;
@@ -25,7 +27,7 @@ extern int left[120];
 extern int right[120];
 extern uint8 image[120][188];
 extern uint16 pro_time;
-
+extern uint8 circle_flag;
 extern uint8 left_copy[120];
 extern uint8 right_copy[120];
 extern uint8 middle_copy[120];
@@ -63,6 +65,9 @@ void Cross_Road(void);
 void Bend_Straight_Opinion(void);
 void Cross_Inflection_Point(void);
 void Zebra_Crossing(void);
-
+void Growth_Direction(void);
+void Circle_Upper_right(void);
+void Middle_Empty(void);
+void Middle_Empty_Set(uint8 dir, uint8 start_line , uint8 end_line);
 
 #endif

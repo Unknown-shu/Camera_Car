@@ -47,25 +47,26 @@ void Config_page_process(int Event_Code)
      else              ips200_show_string_color(0, 18*4,"", PenColor_else);
 
     //指针向上
-       if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
-       {
-           gpio_set_level(Beep,1);
-           system_delay_ms(10);
-           gpio_set_level(Beep,0);
-           key_clear_state(KEY_1);
-           line_number--;//高亮选择往下
-           pagelimit(&line_number,line_number_max);
-       }
-       //指针向下
-       if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
-       {
-           gpio_set_level(Beep,1);
-           system_delay_ms(10);
-           gpio_set_level(Beep,0);
-           key_clear_state(KEY_3);
-           line_number++; //高亮选择往上
-           pagelimit(&line_number,line_number_max);
-       }
+//       if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
+//       {
+//           gpio_set_level(Beep,1);
+//           system_delay_ms(10);
+//           gpio_set_level(Beep,0);
+//           key_clear_state(KEY_1);
+//           line_number--;//高亮选择往下
+//           pagelimit(&line_number,line_number_max);
+//       }
+//       //指针向下
+//       if(key_get_state(KEY_3) == KEY_SHORT_PRESS)
+//       {
+//           gpio_set_level(Beep,1);
+//           system_delay_ms(10);
+//           gpio_set_level(Beep,0);
+//           key_clear_state(KEY_3);
+//           line_number++; //高亮选择往上
+//           pagelimit(&line_number,line_number_max);
+//       }
+        Line_Num_Flush(&line_number);
        //指针向左
        if(key_get_state(KEY_2) == KEY_SHORT_PRESS)
        {

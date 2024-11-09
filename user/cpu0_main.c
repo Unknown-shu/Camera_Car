@@ -104,24 +104,24 @@ int core0_main(void)
     pit_ms_init(CCU60_CH1, 1000);     //按键扫描中断初始化
     pit_ms_init(CCU61_CH0, 5);     //pid中断
 
+
     Flash_Init();
     // 此处编写用户代码 例如外设初始化代码等
 	cpu_wait_event_ready();         // 等待所有核心初始化完毕
 
-	             //商店蜂鸣
+
 	ips200_set_color(RGB565_WHITE, RGB565_BLACK);
 	ips200_clear();
 
 	Wifi_Image_Init();
 
-	Beep_MediumRing();
+	Beep_MediumRing(); //上电蜂鸣
 	Init_End_Flag = 1;
 
 
 
     while (TRUE)
     {
-
 
         // 此处编写需要循环执行的代码
         if(g_Car_Status == 0 || g_started_debug == 1)
@@ -130,31 +130,29 @@ int core0_main(void)
         {
             Car_Stop();
         }
-
-
-
-
-
+        if(key_get_state(KEY_6) == KEY_SHORT_PRESS)
+        {
+            Car_Start();
+//            key_clear_all_state();
+            Beep_Start();
+        }
 //      FPS = 1000 / g_past_time ;
 //        ips200_show_int(204,0 , FPS, 3);
-
         ips200_show_int(188, 0, camera_process_FPS, 5);
+//        ips200_show_float(50, 18*5, rd_calculate, 4, 6);
 //        ips200_show_int(188, 18, g_past_time, 5);
 //        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, middle[0], MT9V03X_W, MT9V03X_H);
 //        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, left[0], MT9V03X_W, MT9V03X_H);
 //        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, right[0], MT9V03X_W, MT9V03X_H);
-
-
-
 //	    ips200_show_int(204,0 , enter_flag, 3);
 //	    printf("%d ,%d ,%d ,%d, %d, %d\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r,pwm_left, pwm_right);
-//	    printf("%d ,%d ,%d ,%d,\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r);
+//
 //	    printf("%d\r\n",V0);
         // 此处编写需要循环执行的代码
-//	    Get_Switch_Num();
+
 //	    printf("%d\r\n",switch_encoder_num);
 //	    uart_write_string(UART_2, "Test\r\n");
-
+//        printf("%d\r\n",switch_encoder_change_num);
 	}
 }
 

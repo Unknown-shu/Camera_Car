@@ -33,10 +33,10 @@ void main_page_process(int Event_Code)
     if(line_number!=5) ips200_show_string_color(0, 18*5,"", PenColor);
      else              ips200_show_string_color(0, 18*5,"", PenColor_else);
 
-    ips200_show_string_color(0, 18*5,"L:", PenColor_else);
-    ips200_show_int(32, 18*5, target_left, 3);
-    ips200_show_string_color(0, 18*6,"R:", PenColor_else);
-    ips200_show_int(32, 18*6, target_right, 3);
+//    ips200_show_string_color(0, 18*5,"L:", PenColor_else);
+//    ips200_show_int(32, 18*5, target_left, 3);
+//    ips200_show_string_color(0, 18*6,"R:", PenColor_else);
+//    ips200_show_int(32, 18*6, target_right, 3);
 
     if(key_get_state(KEY_1) == KEY_SHORT_PRESS)
     {
@@ -56,6 +56,12 @@ void main_page_process(int Event_Code)
         line_number++; //∏ﬂ¡¡—°‘ÒÕ˘…œ
         pagelimit(&line_number,line_number_max);
     }
+//    if(If_Switch_Encoder_Change() == 1)
+//    {
+//        line_number += switch_encoder_change_num;
+//        pagelimit(&line_number,line_number_max);
+//    }
+    Line_Num_Flush(&line_number);
     if(key_get_state(KEY_4) == KEY_SHORT_PRESS)
     {
         gpio_set_level(Beep,1);

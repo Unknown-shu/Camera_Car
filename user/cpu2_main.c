@@ -79,8 +79,12 @@ void core2_main(void)
 //            printf("111");
             Wifi_Image_Send_Camera();
         }
-
-
+//        if(switch_encode_bring_flag)
+//        {
+//            switch_encode_bring_flag = 0;
+//            Beep_ShortRing();
+//        }
+//        printf("%d ,%d ,%d ,%d,\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r);
 
         // 此处编写需要循环执行的代码
     }

@@ -2,6 +2,7 @@
 #define  _Motor_H
 
 #define MOTOR_MODE 1            //1是双路PWM，0是一路方向一路PWM
+#define MIDDLE_LINE_MODE    1   //1是不使用权重，2是使用权重
 
 #include "PIN.H"
 #include "zf_driver_pwm.h"
@@ -10,11 +11,12 @@
 #include "MyEncoder.h"
 #include "MyCamera.h"
 
-#define MOTOR_PWM_MAX 7000
-#define MOTOR_PWM_MIN -3000
+#define MOTOR_PWM_MAX 8000
+#define MOTOR_PWM_MIN -8000
 
 extern int target_left,target_right;
 extern float V0 ;
+extern float basic_V0;
 extern int pwm_left, pwm_right;
 
 // 函数简介     双边限幅 数据范围是 [-32768,32767]
