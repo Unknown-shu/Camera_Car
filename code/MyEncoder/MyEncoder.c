@@ -1,17 +1,33 @@
+#include "zf_common_headfile.h"
 #include "MYENCODER.h"
 
-int16 Encoder_speed_l = 0;
-int16 Encoder_speed_r = 0;
+
+#define ENCODER_L         TIM2_ENCODER_CH1_P33_7     //左编码器计数引脚
+#define ENCODER_DIR_L     TIM2_ENCODER_CH2_P33_6    //左编码器方向引脚
+
+#define ENCODER_R         TIM6_ENCODER_CH1_P20_3     //右编码器计数引脚
+#define ENCODER_DIR_R     TIM6_ENCODER_CH2_P20_0    //右编码器方向引脚
+
+float speed_L;//左轮编码器速度
+float speed_R;//右轮编码器速度
+
 
 int switch_encoder_num = 0;
 int switch_encoder_change_num = 0;
 uint8 switch_encode_bring_flag;
 uint8 switch_encode_change_get_buff_flag = 0;                   //变化缓冲，谨防变化未用上就将变化值清零
+
+uint8 encoder_distance_open_flag = 0;
+int left_encoder_distance_cnt = 0;
+int right_encoder_distance_cnt = 0;
+float left_encoder_distance = 0;
+float right_encoder_distance = 0;
+
 void MyEncoder_Init(void)
 {
     encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//左轮编码器
     encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//右轮编码器
-    encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
+//    encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 //    encoder_dir_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 
 }
@@ -82,19 +98,22 @@ int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
     return CoderOut;
 }
 //-------------------------------------------------------------------------------------------------------------------
-//  @brief      获得转速
+//  @brief      获得编码器读值
 //  @param      gptn：编码器对应编号
 //  @param      n   ：n次均值滤波
 //  @return     int16
 //  @note       里面的自加，自减根据实际情况调，车往前进是两个编码器值都为正
 //-------------------------------------------------------------------------------------------------------------------
-void GetSpeed(void)
+void Get_Encoder_Cnt(void)
 {
  // 获取编码器的值
-    Encoder_speed_l = -Encoder_MTM(TIM2_ENCODER,3,1);
-    Encoder_speed_r = -Encoder_MTM(TIM6_ENCODER,3,1);
-//    Encoder_speed_r = -Encoder_MTM(TIM3_ENCODER,1,1);
-    //JustFloat_Test();
+    speed_L = -Encoder_MTM(TIM2_ENCODER,3,1);
+    speed_R = -Encoder_MTM(TIM6_ENCODER,3,1);
+    if(encoder_distance_open_flag == 1)
+    {
+        left_encoder_distance_cnt += speed_L;
+        right_encoder_distance_cnt += speed_R;
+    }
 };
 
 /***********************************************
@@ -192,4 +211,43 @@ uint8 If_Switch_Encoder_Change(void)
     {
         return 0;
     }
+}
+/***********************************************
+* @brief :获取编码器路程
+* @param : void
+* @return: 左路程和右路程的地址
+* @date  : 2024年11月9日13:26
+* @author: SJX
+************************************************/
+void Get_Encoder_Distance(float *left_distance, float *right_distance)
+{
+    left_encoder_distance = left_encoder_distance_cnt * 0.0000879783;
+    right_encoder_distance = right_encoder_distance_cnt * 0.0000879783;
+    *left_distance = left_encoder_distance;
+    *right_distance = right_encoder_distance;
+}
+
+/***********************************************
+* @brief : 开启编码器里程记录
+* @param : void
+* @return: void
+* @date  : 2024年11月9日13:31
+* @author: SJX
+************************************************/
+void Encoder_Distance_Start(void)
+{
+    encoder_distance_open_flag = 1;
+    left_encoder_distance = 0;
+}
+
+/***********************************************
+* @brief : 结束编码器里程记录
+* @param : void
+* @return: void
+* @date  : 2024年11月9日13:33
+* @author: SJX
+************************************************/
+void Encoder_Distance_Stop(void)
+{
+    encoder_distance_open_flag = 0;
 }
