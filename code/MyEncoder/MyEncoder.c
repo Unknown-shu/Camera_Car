@@ -205,16 +205,17 @@ uint8 If_Switch_Encoder_Change(void)
     }
 }
 /***********************************************
-* @brief :获取编码器路程
+* @brief : 获取编码器路程
 * @param : void
 * @return: 左路程和右路程的地址
 * @date  : 2024年11月9日13:26
 * @author: SJX
+* @note  : 单位cm
 ************************************************/
 void Get_Encoder_Distance(float *left_distance, float *right_distance)
 {
-    left_encoder_distance = left_encoder_distance_cnt * 0.0000879783;
-    right_encoder_distance = right_encoder_distance_cnt * 0.0000879783;
+    left_encoder_distance = left_encoder_distance_cnt * 0.0000879783 * 100;
+    right_encoder_distance = right_encoder_distance_cnt * 0.0000879783 * 100;
     *left_distance = left_encoder_distance;
     *right_distance = right_encoder_distance;
 }
