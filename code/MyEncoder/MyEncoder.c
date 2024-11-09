@@ -1,35 +1,27 @@
-#include "zf_common_headfile.h"
 #include "MYENCODER.h"
 
-float speed_L;//å·¦è½®ç¼–ç å™¨é€Ÿåº¦
-float speed_R;//å³è½®ç¼–ç å™¨é€Ÿåº¦
+int16 Encoder_speed_l = 0;
+int16 Encoder_speed_r = 0;
 
 int switch_encoder_num = 0;
 int switch_encoder_change_num = 0;
 uint8 switch_encode_bring_flag;
-uint8 switch_encode_change_get_buff_flag = 0;                   //å˜åŒ–ç¼“å†²ï¼Œè°¨é˜²å˜åŒ–æœªç”¨ä¸Šå°±å°†å˜åŒ–å€¼æ¸…é›¶
-
-uint8 encoder_distance_open_flag = 0;
-int left_encoder_distance_cnt = 0;
-int right_encoder_distance_cnt = 0;
-float left_encoder_distance = 0;
-float right_encoder_distance = 0;
-
+uint8 switch_encode_change_get_buff_flag = 0;                   //±ä»¯»º³å£¬½÷·À±ä»¯Î´ÓÃÉÏ¾Í½«±ä»¯ÖµÇåÁã
 void MyEncoder_Init(void)
 {
-    encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//å·¦è½®ç¼–ç å™¨
-    encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//å³è½®ç¼–ç å™¨
-//    encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
+    encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//×óÂÖ±àÂëÆ÷
+    encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//ÓÒÂÖ±àÂëÆ÷
+    encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 //    encoder_dir_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 
 }
 //-------------------------------------------------------------------------------------------------------------------
-//  @brief      ç¼–ç å™¨é‡‡é›†
-//  @param      gptn    ï¼šç¼–ç å™¨å¯¹åº”ç¼–å·
-//  @param      n       ï¼šnæ¬¡å‡å€¼æ»¤æ³¢
-//  @param      direct  ï¼š1æˆ–è€…0 å†³å®š ç¼–ç å™¨çš„æ­£è´Ÿå·
+//  @brief      ±àÂëÆ÷²É¼¯
+//  @param      gptn    £º±àÂëÆ÷¶ÔÓ¦±àºÅ
+//  @param      n       £ºn´Î¾ùÖµÂË²¨
+//  @param      direct  £º1»òÕß0 ¾ö¶¨ ±àÂëÆ÷µÄÕı¸ººÅ
 //  @return     int16
-//  @note       è¦æ˜¯ç¼–ç å™¨æ–¹å‘åäº†å°±æŠŠdirectæ”¹ä¸€ä¸‹ 1æˆ–è€…0
+//  @note       ÒªÊÇ±àÂëÆ÷·½Ïò·´ÁË¾Í°Ñdirect¸ÄÒ»ÏÂ 1»òÕß0
 //-------------------------------------------------------------------------------------------------------------------
 int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
 {
@@ -85,34 +77,31 @@ int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
         default:
             break;
     }
-    encoder_clear_count(gptn);    //ç¼–ç å™¨æ¸…ç©º
+    encoder_clear_count(gptn);    //±àÂëÆ÷Çå¿Õ
 
     return CoderOut;
 }
 //-------------------------------------------------------------------------------------------------------------------
-//  @brief      è·å¾—ç¼–ç å™¨è¯»å€¼
-//  @param      gptnï¼šç¼–ç å™¨å¯¹åº”ç¼–å·
-//  @param      n   ï¼šnæ¬¡å‡å€¼æ»¤æ³¢
+//  @brief      »ñµÃ×ªËÙ
+//  @param      gptn£º±àÂëÆ÷¶ÔÓ¦±àºÅ
+//  @param      n   £ºn´Î¾ùÖµÂË²¨
 //  @return     int16
-//  @note       é‡Œé¢çš„è‡ªåŠ ï¼Œè‡ªå‡æ ¹æ®å®é™…æƒ…å†µè°ƒï¼Œè½¦å¾€å‰è¿›æ˜¯ä¸¤ä¸ªç¼–ç å™¨å€¼éƒ½ä¸ºæ­£
+//  @note       ÀïÃæµÄ×Ô¼Ó£¬×Ô¼õ¸ù¾İÊµ¼ÊÇé¿öµ÷£¬³µÍùÇ°½øÊÇÁ½¸ö±àÂëÆ÷Öµ¶¼ÎªÕı
 //-------------------------------------------------------------------------------------------------------------------
-void Get_Encoder_Cnt(void)
+void GetSpeed(void)
 {
- // è·å–ç¼–ç å™¨çš„å€¼
-    speed_L = -Encoder_MTM(TIM2_ENCODER,3,1);
-    speed_R = -Encoder_MTM(TIM6_ENCODER,3,1);
-    if(encoder_distance_open_flag == 1)
-    {
-        left_encoder_distance_cnt += speed_L;
-        right_encoder_distance_cnt += speed_R;
-    }
+ // »ñÈ¡±àÂëÆ÷µÄÖµ
+    Encoder_speed_l = -Encoder_MTM(TIM2_ENCODER,3,1);
+    Encoder_speed_r = -Encoder_MTM(TIM6_ENCODER,3,1);
+//    Encoder_speed_r = -Encoder_MTM(TIM3_ENCODER,1,1);
+    //JustFloat_Test();
 };
 
 /***********************************************
-* @brief : è·å–æ—‹è½¬ç¼–ç å™¨å€¼
+* @brief : »ñÈ¡Ğı×ª±àÂëÆ÷Öµ
 * @param : void
 * @return: void
-* @date  : 2024å¹´11æœˆ6æ—¥12:23:25
+* @date  : 2024Äê11ÔÂ6ÈÕ12:23:25
 * @author: SJX
 ************************************************/
 void Get_Switch_Num(void)
@@ -165,10 +154,10 @@ void Get_Switch_Num(void)
 
 }
 /***********************************************
-* @brief : æ—‹è½¬ç¼–ç å™¨è·å–å‡½æ•°ï¼Œä»…ç”¨äºæ—‹è½¬ç¼–ç å™¨
+* @brief : Ğı×ª±àÂëÆ÷»ñÈ¡º¯Êı£¬½öÓÃÓÚĞı×ª±àÂëÆ÷
 * @param : void
 * @return: void
-* @date  : 2024å¹´11æœˆ6æ—¥12:26:53
+* @date  : 2024Äê11ÔÂ6ÈÕ12:26:53
 * @author: SJX
 ************************************************/
 int16 My_Switch_encoder_get_count (encoder_index_enum encoder_n)
@@ -186,10 +175,10 @@ int16 My_Switch_encoder_get_count (encoder_index_enum encoder_n)
     return encoder_data;
 }
 /***********************************************
-* @brief : åˆ¤æ–­æ—‹è½¬ç¼–ç å™¨æ˜¯å¦å‡ºç°å˜åŒ–
+* @brief : ÅĞ¶ÏĞı×ª±àÂëÆ÷ÊÇ·ñ³öÏÖ±ä»¯
 * @param : void
-* @return: uint8            1å˜åŒ– 0ä¸å˜
-* @date  : 2024å¹´11æœˆ6æ—¥12:27:38
+* @return: uint8            1±ä»¯ 0²»±ä
+* @date  : 2024Äê11ÔÂ6ÈÕ12:27:38
 * @author: SJX
 ************************************************/
 uint8 If_Switch_Encoder_Change(void)
@@ -203,44 +192,4 @@ uint8 If_Switch_Encoder_Change(void)
     {
         return 0;
     }
-}
-/***********************************************
-* @brief : è·å–ç¼–ç å™¨è·¯ç¨‹
-* @param : void
-* @return: å·¦è·¯ç¨‹å’Œå³è·¯ç¨‹çš„åœ°å€
-* @date  : 2024å¹´11æœˆ9æ—¥13:26
-* @author: SJX
-* @note  : å•ä½cm
-************************************************/
-void Get_Encoder_Distance(float *left_distance, float *right_distance)
-{
-    left_encoder_distance = left_encoder_distance_cnt * 0.0000879783 * 100;
-    right_encoder_distance = right_encoder_distance_cnt * 0.0000879783 * 100;
-    *left_distance = left_encoder_distance;
-    *right_distance = right_encoder_distance;
-}
-
-/***********************************************
-* @brief : å¼€å¯ç¼–ç å™¨é‡Œç¨‹è®°å½•
-* @param : void
-* @return: void
-* @date  : 2024å¹´11æœˆ9æ—¥13:31
-* @author: SJX
-************************************************/
-void Encoder_Distance_Start(void)
-{
-    encoder_distance_open_flag = 1;
-    left_encoder_distance = 0;
-}
-
-/***********************************************
-* @brief : ç»“æŸç¼–ç å™¨é‡Œç¨‹è®°å½•
-* @param : void
-* @return: void
-* @date  : 2024å¹´11æœˆ9æ—¥13:33
-* @author: SJX
-************************************************/
-void Encoder_Distance_Stop(void)
-{
-    encoder_distance_open_flag = 0;
 }

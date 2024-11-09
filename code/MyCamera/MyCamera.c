@@ -996,7 +996,7 @@ int Camera_Get_MidErr(void)
 #if(MIDDLE_LINE_MODE == 1)
     int i;
     int err_sum = 0, err = 0;
-    for(i=55;i < 95; i++)
+    for(i=40;i < 80; i++)
     {
         err_sum += middle_copy[i] ;
     }
@@ -1247,7 +1247,7 @@ void Find_Circle(void)
     static uint16 circle_lost_cnt = 0;
     static uint16 circle_process_cnt = 0;
     static uint16 circle_out_cnt = 0;
-    if((left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 0 && Lost_right_Flag == 0)
+    if((left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 0 && Lost_right_Flag == 0 && Circle_Static_Flag < 3)
                 || cross_road_flag == 2 )
     //        && (Circle_Static_Flag <= 2 || Circle_Static_Flag >= 5))
         {
@@ -1256,23 +1256,23 @@ void Find_Circle(void)
             {
                 circle_lost_cnt = 0;
                 circle_process_cnt = 0;
-                uart_write_string(UART_0, "Circle_OUT\r\n");
+//                uart_write_string(UART_0, "Circle_OUT\r\n");
                 Circle_Static_Flag = 0;
                 circle_flag = 0;
                 Middle_Empty_Set(0, 40, 2);
-//                return ;
+                return ;
             }
 
         }
-    if(circle_process_cnt > 30 || circle_out_cnt > 45 )
+    if(circle_process_cnt > 30 || circle_out_cnt > 40 )
     {
         circle_out_cnt = 0;
         circle_process_cnt = 0;
-        uart_write_string(UART_0, "Circle_OUT\r\n");
+//        uart_write_string(UART_0, "Circle_OUT\r\n");
         Circle_Static_Flag = 0;
         circle_flag = 0;
         Middle_Empty_Set(0, 40, 2);
-//        return ;
+        return ;
     }
 //    memcpy(left_tmp[0], left[0], 120);
 //    printf("%d, %d\r\n",lower_right_inflection_X, lower_right_inflection_Y);
@@ -1293,12 +1293,12 @@ void Find_Circle(void)
 //        Slope_Adding_Line(1, lower_left_inflection_X, lower_left_inflection_Y);
 //        Appoint_Adding_Line(1, , 95,79, 5);
         Appoint_Adding_Line(1, 79, 5,5, 95);
-        uart_write_string(UART_0, "Find_Left_Circle\r\n");
+//        uart_write_string(UART_0, "Find_Left_Circle\r\n");
         circle_flag = 0;
         Left_Roundabout();
         Circle_Static_Flag = 1;
         circle_process_cnt++;
-        if((roundabout_Y > 25 && roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
+        if((Lost_right_Flag == 0 && roundabout_Y > 25 && roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
         {
             circle_process_cnt = 0;
             circle_flag = 0;
@@ -1319,7 +1319,7 @@ void Find_Circle(void)
         {
             circle_process_cnt++;
             Left_Roundabout();
-            uart_write_string(UART_0, "Find_Left_RD\r\n");
+//            uart_write_string(UART_0, "Find_Left_RD\r\n");
     //        Beep_ShortRing();
 //            Appoint_Adding_Line(1, 187, 120,roundabout_X, roundabout_Y);
             Appoint_Adding_Line(1, 79, 5,5, 95);
@@ -1333,12 +1333,12 @@ void Find_Circle(void)
     //拉线入环
     if(Circle_Static_Flag == 3)
     {
-        circle_process_cnt++;
+//        circle_process_cnt++;
 //        Appoint_Adding_Line(2, upper_left_inflection_X, upper_left_inflection_Y, right[32], 68);
         Appoint_Adding_Line(2, 27, 19, right[80], 80);
         Middle_Empty_Set(1, 24, 2);
         Left_Roundabout();
-        uart_write_string(UART_0, "Find_Left_Upper\r\n");
+//        uart_write_string(UART_0, "Find_Left_Upper\r\n");
         if(roundabout_Flag == 0 && upper_left_inflection_flag == 0 && left_straight_flag == 1 && right_straight_flag == 0)
         {
             circle_process_cnt = 0;
@@ -1348,7 +1348,7 @@ void Find_Circle(void)
     //已经入环准备出环
     if(Circle_Static_Flag == 4)
     {
-        uart_write_string(UART_0, "Find_IN\r\n");
+//        uart_write_string(UART_0, "Find_IN\r\n");
         Circle_Upper_right();
         if(circle_upper_right_inflection_flag == 1)
         {
@@ -1378,7 +1378,7 @@ void Find_Circle(void)
     }
 
 
-
+//    printf("%d, %d\r\n", Circle_Static_Flag, circle_flag);
 
 //    if(Lost_left_Flag == 0 && )
 //    double a[2], b[2], c[2];
@@ -1399,7 +1399,7 @@ void Find_Circle(void)
 //    printf("%d, %d, %d, %d, %d \r\n",left_straight_flag, right_straight_flag, lower_left_inflection_Flag,lower_right_inflection_Flag,roundabout_Flag);
 //    Right_Roundabout();
 
-    printf("%d, %d, %d, %d, %d, %d, %d\r\n",Circle_Static_Flag, cross_road_flag, Circle_Static_Flag, cross_road_status, circle_process_cnt, circle_lost_cnt, circle_out_cnt);
+//    printf("%d, %d, %d, %d, %d, %d, %d\r\n",Circle_Static_Flag, cross_road_flag, Circle_Static_Flag, cross_road_status, circle_process_cnt, circle_lost_cnt, circle_out_cnt);
 //    printf("%d, %d, %d, %d\r\n",roundabout_Flag, Circle_Static_Flag, lower_right_inflection_Flag,Circle_Enter_Flag);
 //    uart_write_byte(UART_2, roundabout_Flag);
 

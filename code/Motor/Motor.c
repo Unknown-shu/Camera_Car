@@ -204,7 +204,7 @@ void Turn_Ctrl(void)
     V0 = basic_V0 - (abs(g_camera_mid_err));
     if(circle_flag == 1)
     {
-//        V0 = 50;
+        V0 = 100 - (abs(g_camera_mid_err));
     }
     target_left = V0 - speed_delta ;
     target_right = V0 + speed_delta ;
