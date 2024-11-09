@@ -1,21 +1,13 @@
 #include "zf_common_headfile.h"
 #include "MYENCODER.h"
 
-
-#define ENCODER_L         TIM2_ENCODER_CH1_P33_7     //×ó±àÂëÆ÷¼ÆÊıÒı½Å
-#define ENCODER_DIR_L     TIM2_ENCODER_CH2_P33_6    //×ó±àÂëÆ÷·½ÏòÒı½Å
-
-#define ENCODER_R         TIM6_ENCODER_CH1_P20_3     //ÓÒ±àÂëÆ÷¼ÆÊıÒı½Å
-#define ENCODER_DIR_R     TIM6_ENCODER_CH2_P20_0    //ÓÒ±àÂëÆ÷·½ÏòÒı½Å
-
-float speed_L;//×óÂÖ±àÂëÆ÷ËÙ¶È
-float speed_R;//ÓÒÂÖ±àÂëÆ÷ËÙ¶È
-
+float speed_L;//å·¦è½®ç¼–ç å™¨é€Ÿåº¦
+float speed_R;//å³è½®ç¼–ç å™¨é€Ÿåº¦
 
 int switch_encoder_num = 0;
 int switch_encoder_change_num = 0;
 uint8 switch_encode_bring_flag;
-uint8 switch_encode_change_get_buff_flag = 0;                   //±ä»¯»º³å£¬½÷·À±ä»¯Î´ÓÃÉÏ¾Í½«±ä»¯ÖµÇåÁã
+uint8 switch_encode_change_get_buff_flag = 0;                   //å˜åŒ–ç¼“å†²ï¼Œè°¨é˜²å˜åŒ–æœªç”¨ä¸Šå°±å°†å˜åŒ–å€¼æ¸…é›¶
 
 uint8 encoder_distance_open_flag = 0;
 int left_encoder_distance_cnt = 0;
@@ -25,19 +17,19 @@ float right_encoder_distance = 0;
 
 void MyEncoder_Init(void)
 {
-    encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//×óÂÖ±àÂëÆ÷
-    encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//ÓÒÂÖ±àÂëÆ÷
+    encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//å·¦è½®ç¼–ç å™¨
+    encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//å³è½®ç¼–ç å™¨
 //    encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 //    encoder_dir_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 
 }
 //-------------------------------------------------------------------------------------------------------------------
-//  @brief      ±àÂëÆ÷²É¼¯
-//  @param      gptn    £º±àÂëÆ÷¶ÔÓ¦±àºÅ
-//  @param      n       £ºn´Î¾ùÖµÂË²¨
-//  @param      direct  £º1»òÕß0 ¾ö¶¨ ±àÂëÆ÷µÄÕı¸ººÅ
+//  @brief      ç¼–ç å™¨é‡‡é›†
+//  @param      gptn    ï¼šç¼–ç å™¨å¯¹åº”ç¼–å·
+//  @param      n       ï¼šnæ¬¡å‡å€¼æ»¤æ³¢
+//  @param      direct  ï¼š1æˆ–è€…0 å†³å®š ç¼–ç å™¨çš„æ­£è´Ÿå·
 //  @return     int16
-//  @note       ÒªÊÇ±àÂëÆ÷·½Ïò·´ÁË¾Í°Ñdirect¸ÄÒ»ÏÂ 1»òÕß0
+//  @note       è¦æ˜¯ç¼–ç å™¨æ–¹å‘åäº†å°±æŠŠdirectæ”¹ä¸€ä¸‹ 1æˆ–è€…0
 //-------------------------------------------------------------------------------------------------------------------
 int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
 {
@@ -93,20 +85,20 @@ int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
         default:
             break;
     }
-    encoder_clear_count(gptn);    //±àÂëÆ÷Çå¿Õ
+    encoder_clear_count(gptn);    //ç¼–ç å™¨æ¸…ç©º
 
     return CoderOut;
 }
 //-------------------------------------------------------------------------------------------------------------------
-//  @brief      »ñµÃ±àÂëÆ÷¶ÁÖµ
-//  @param      gptn£º±àÂëÆ÷¶ÔÓ¦±àºÅ
-//  @param      n   £ºn´Î¾ùÖµÂË²¨
+//  @brief      è·å¾—ç¼–ç å™¨è¯»å€¼
+//  @param      gptnï¼šç¼–ç å™¨å¯¹åº”ç¼–å·
+//  @param      n   ï¼šnæ¬¡å‡å€¼æ»¤æ³¢
 //  @return     int16
-//  @note       ÀïÃæµÄ×Ô¼Ó£¬×Ô¼õ¸ù¾İÊµ¼ÊÇé¿öµ÷£¬³µÍùÇ°½øÊÇÁ½¸ö±àÂëÆ÷Öµ¶¼ÎªÕı
+//  @note       é‡Œé¢çš„è‡ªåŠ ï¼Œè‡ªå‡æ ¹æ®å®é™…æƒ…å†µè°ƒï¼Œè½¦å¾€å‰è¿›æ˜¯ä¸¤ä¸ªç¼–ç å™¨å€¼éƒ½ä¸ºæ­£
 //-------------------------------------------------------------------------------------------------------------------
 void Get_Encoder_Cnt(void)
 {
- // »ñÈ¡±àÂëÆ÷µÄÖµ
+ // è·å–ç¼–ç å™¨çš„å€¼
     speed_L = -Encoder_MTM(TIM2_ENCODER,3,1);
     speed_R = -Encoder_MTM(TIM6_ENCODER,3,1);
     if(encoder_distance_open_flag == 1)
@@ -117,10 +109,10 @@ void Get_Encoder_Cnt(void)
 };
 
 /***********************************************
-* @brief : »ñÈ¡Ğı×ª±àÂëÆ÷Öµ
+* @brief : è·å–æ—‹è½¬ç¼–ç å™¨å€¼
 * @param : void
 * @return: void
-* @date  : 2024Äê11ÔÂ6ÈÕ12:23:25
+* @date  : 2024å¹´11æœˆ6æ—¥12:23:25
 * @author: SJX
 ************************************************/
 void Get_Switch_Num(void)
@@ -173,10 +165,10 @@ void Get_Switch_Num(void)
 
 }
 /***********************************************
-* @brief : Ğı×ª±àÂëÆ÷»ñÈ¡º¯Êı£¬½öÓÃÓÚĞı×ª±àÂëÆ÷
+* @brief : æ—‹è½¬ç¼–ç å™¨è·å–å‡½æ•°ï¼Œä»…ç”¨äºæ—‹è½¬ç¼–ç å™¨
 * @param : void
 * @return: void
-* @date  : 2024Äê11ÔÂ6ÈÕ12:26:53
+* @date  : 2024å¹´11æœˆ6æ—¥12:26:53
 * @author: SJX
 ************************************************/
 int16 My_Switch_encoder_get_count (encoder_index_enum encoder_n)
@@ -194,10 +186,10 @@ int16 My_Switch_encoder_get_count (encoder_index_enum encoder_n)
     return encoder_data;
 }
 /***********************************************
-* @brief : ÅĞ¶ÏĞı×ª±àÂëÆ÷ÊÇ·ñ³öÏÖ±ä»¯
+* @brief : åˆ¤æ–­æ—‹è½¬ç¼–ç å™¨æ˜¯å¦å‡ºç°å˜åŒ–
 * @param : void
-* @return: uint8            1±ä»¯ 0²»±ä
-* @date  : 2024Äê11ÔÂ6ÈÕ12:27:38
+* @return: uint8            1å˜åŒ– 0ä¸å˜
+* @date  : 2024å¹´11æœˆ6æ—¥12:27:38
 * @author: SJX
 ************************************************/
 uint8 If_Switch_Encoder_Change(void)
@@ -213,10 +205,10 @@ uint8 If_Switch_Encoder_Change(void)
     }
 }
 /***********************************************
-* @brief :»ñÈ¡±àÂëÆ÷Â·³Ì
+* @brief :è·å–ç¼–ç å™¨è·¯ç¨‹
 * @param : void
-* @return: ×óÂ·³ÌºÍÓÒÂ·³ÌµÄµØÖ·
-* @date  : 2024Äê11ÔÂ9ÈÕ13:26
+* @return: å·¦è·¯ç¨‹å’Œå³è·¯ç¨‹çš„åœ°å€
+* @date  : 2024å¹´11æœˆ9æ—¥13:26
 * @author: SJX
 ************************************************/
 void Get_Encoder_Distance(float *left_distance, float *right_distance)
@@ -228,10 +220,10 @@ void Get_Encoder_Distance(float *left_distance, float *right_distance)
 }
 
 /***********************************************
-* @brief : ¿ªÆô±àÂëÆ÷Àï³Ì¼ÇÂ¼
+* @brief : å¼€å¯ç¼–ç å™¨é‡Œç¨‹è®°å½•
 * @param : void
 * @return: void
-* @date  : 2024Äê11ÔÂ9ÈÕ13:31
+* @date  : 2024å¹´11æœˆ9æ—¥13:31
 * @author: SJX
 ************************************************/
 void Encoder_Distance_Start(void)
@@ -241,10 +233,10 @@ void Encoder_Distance_Start(void)
 }
 
 /***********************************************
-* @brief : ½áÊø±àÂëÆ÷Àï³Ì¼ÇÂ¼
+* @brief : ç»“æŸç¼–ç å™¨é‡Œç¨‹è®°å½•
 * @param : void
 * @return: void
-* @date  : 2024Äê11ÔÂ9ÈÕ13:33
+* @date  : 2024å¹´11æœˆ9æ—¥13:33
 * @author: SJX
 ************************************************/
 void Encoder_Distance_Stop(void)
