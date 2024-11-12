@@ -62,28 +62,22 @@ IFX_INTERRUPT(cc60_pit_ch1_isr, 0, CCU6_0_CH1_ISR_PRIORITY)
 
 IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
 {
-        Beep_Stop();
+        Beep_Timer_ShortRing_Stop();
         SysTimer_Stop();
-
+//        Track_Out_Protect();
 //    interrupt_global_enable(0);                     // ¿ªÆôÖÐ¶ÏÇ¶Ì×
-        static uint8 i = 0;
-        if(i++ > 100)
-        {
 
-            if(camera_process_cnt <= 8)
-            {
-                Car_Stop();
-            }
-            i = 0;
-            camera_process_cnt = 0;
-        }
         if(g_Car_Status == status_car_start)
         {
 
         }
 //        GetSpeed();
 //        MotorCtrl();
-        Turn_Ctrl();
+        if(g_Car_Status != status_car_gyroscope_run)
+        {
+            Turn_Ctrl();
+        }
+
         if(g_Car_Status == status_car_stop)
         {
             Car_Stop();

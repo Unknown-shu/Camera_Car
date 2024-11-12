@@ -86,6 +86,7 @@ int core0_main(void)
     // 此处编写用户代码 例如外设初始化代码等
 
     uint8 FPS;
+    Encoder_Distance_Typedef Distance_Test_Structure;
 
     system_delay_init();            //延迟初始化
     Menu_init();                    //菜单初始化
@@ -113,12 +114,13 @@ int core0_main(void)
 	ips200_set_color(RGB565_WHITE, RGB565_BLACK);
 	ips200_clear();
 
-	Wifi_Image_Init();
+//	Wifi_Image_Init();
 
 	Beep_MediumRing(); //上电蜂鸣
 	Init_End_Flag = 1;
 
 
+//	Gyroscope_Run();
 
     while (TRUE)
     {
@@ -132,10 +134,20 @@ int core0_main(void)
         }
         if(key_get_state(KEY_6) == KEY_SHORT_PRESS)
         {
+//            Beep_LongRing();
+            Beep_ShortRing();
             Car_Start();
 //            key_clear_all_state();
-            Beep_Start();
         }
+//        Encoder_Distance_Start(&Distance_Test_Structure);
+//        if(Encoder_Distance_MaxLimit(&Distance_Test_Structure, 20))
+//        {
+//            Beep_MediumRing();
+//        }
+//        Get_Encoder_Distance(&Distance_Test_Structure);
+//        printf("%f\r\n", Distance_Test_Structure.AVG_distance);
+
+
 //      FPS = 1000 / g_past_time ;
 //        ips200_show_int(204,0 , FPS, 3);
         ips200_show_int(188, 0, camera_process_FPS, 5);
