@@ -1,5 +1,7 @@
 #include "MYHEADFILE.h"
 
+uint8 g_switch_encoder_ring_flag = 0;
+
 void Beep_Init(void)
 {
     gpio_init(Beep, GPO, 0, GPO_PUSH_PULL);
@@ -56,10 +58,19 @@ void Beep_Ring(uint16_t Time)
 ************************************************/
 void Beep_Timer_ShortRing(void)
 {
+    g_switch_encoder_ring_flag = 1;
     Beep_Start();
 //    pit_start(CCU61_CH1);
 //    pit_enable(CCU61_CH1);
+}
 
+void Beep_Timer_ShortRing_Stop(void)
+{
+    if(g_switch_encoder_ring_flag == 1)
+    {
+        g_switch_encoder_ring_flag = 0;
+        Beep_Stop();
+    }
 }
 
 

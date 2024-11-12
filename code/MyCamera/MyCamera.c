@@ -51,6 +51,9 @@ uint8 upper_right_inflection_Y =0;
 uint8 circle_upper_right_inflection_flag=0;
 uint8 circle_upper_right_inflection_X =0;
 uint8 circle_upper_right_inflection_Y =0;
+uint8 last_circle_upper_right_inflection_flag=0;
+uint8 last_circle_upper_right_inflection_X =0;
+uint8 last_circle_upper_right_inflection_Y =0;
 uint8 left_straight_flag;
 uint8 right_straight_flag;
 uint8 ten_inflexion_down_l=0;    //十字左下拐点行坐标
@@ -112,6 +115,7 @@ uint8 middle_empty_dir = 1;
 uint8 middle_empty_start_line = 0;
 uint8 middle_empty_end_line = 0;
 
+
 int Endline = 1 ;           //截止行
 
 uint16 pro_time;            //处理时间
@@ -137,6 +141,8 @@ int weight[120]=
 
 };//11120
 int camera_miderr;              //摄像头中线偏差
+
+
 
 void MyCamera_Init(void)
 {
@@ -990,17 +996,18 @@ void Lost_Left(void)
 * @date  : 2024年10月25日12:28:00
 * @author: SJX
 ************************************************/
+uint8 camera_horizon = 20;           //前瞻
 int Camera_Get_MidErr(void)
 {
 
 #if(MIDDLE_LINE_MODE == 1)
     int i;
     int err_sum = 0, err = 0;
-    for(i=40;i < 80; i++)
+    for(i=camera_horizon;i < camera_horizon+70; i++)
     {
         err_sum += middle_copy[i] ;
     }
-    err = err_sum / 40;
+    err = err_sum / 70;
     return err;
 #endif
 #if(MIDDLE_LINE_MODE == 2)
@@ -1244,15 +1251,22 @@ void Middle_Empty_Set(uint8 dir, uint8 start_line , uint8 end_line)
 ************************************************/
 void Find_Circle(void)
 {
+
+    static Encoder_Distance_Typedef Circle_Out_Distance_Structure;
+    static Encoder_Distance_Typedef Circle_Decide_Distance_Structure;
     static uint16 circle_lost_cnt = 0;
     static uint16 circle_process_cnt = 0;
     static uint16 circle_out_cnt = 0;
-    if((left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 0 && Lost_right_Flag == 0 && Circle_Static_Flag < 3)
+//    printf("%f\r\n",Circle_Out_Distance_Structure.AVG_distance);
+//    printf("%d, %d, %d, %d\r\n",left_straight_flag, right_straight_flag, Lost_left_Flag, Lost_right_Flag);
+//    if((left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 0 && Lost_right_Flag == 0 && Circle_Static_Flag <= 3)
+//                || cross_road_flag == 2 )
+    if((!(left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 1 && Lost_right_Flag == 0) && Circle_Static_Flag < 3)
                 || cross_road_flag == 2 )
     //        && (Circle_Static_Flag <= 2 || Circle_Static_Flag >= 5))
         {
-            circle_lost_cnt++;
-            if(circle_lost_cnt >= 10)
+            Encoder_Distance_Start(&Circle_Decide_Distance_Structure);
+            if(Encoder_Distance_MaxLimit(&Circle_Decide_Distance_Structure, 10))
             {
                 circle_lost_cnt = 0;
                 circle_process_cnt = 0;
@@ -1262,18 +1276,21 @@ void Find_Circle(void)
                 Middle_Empty_Set(0, 40, 2);
                 return ;
             }
-
         }
-    if(circle_process_cnt > 30 || circle_out_cnt > 40 )
+    else
     {
-        circle_out_cnt = 0;
-        circle_process_cnt = 0;
-//        uart_write_string(UART_0, "Circle_OUT\r\n");
-        Circle_Static_Flag = 0;
-        circle_flag = 0;
-        Middle_Empty_Set(0, 40, 2);
-        return ;
+        Encoder_Distance_Stop(&Circle_Decide_Distance_Structure);
     }
+//    if(circle_process_cnt > 30 || circle_out_cnt > 40 )
+//    {
+//        circle_out_cnt = 0;
+//        circle_process_cnt = 0;
+////        uart_write_string(UART_0, "Circle_OUT\r\n");
+//        Circle_Static_Flag = 0;
+//        circle_flag = 0;
+//        Middle_Empty_Set(0, 40, 2);
+//        return ;
+//    }
 //    memcpy(left_tmp[0], left[0], 120);
 //    printf("%d, %d\r\n",lower_right_inflection_X, lower_right_inflection_Y);
 //    //右圆环
@@ -1287,23 +1304,36 @@ void Find_Circle(void)
 //    }
 //    //左圆环
 
-    if(Circle_Static_Flag == 1 || (upper_right_inflection_flag == 0 && lower_left_inflection_Flag == 1 && lower_right_inflection_Flag == 0 && Circle_Static_Flag == 0 ))
+    if(Circle_Static_Flag == 0 && upper_right_inflection_flag == 0 && lower_left_inflection_Flag == 1 && lower_right_inflection_Flag == 0 )
     {
-
+//        uart_write_string(UART_0, "Find_Left_Circle\r\n");
 //        Slope_Adding_Line(1, lower_left_inflection_X, lower_left_inflection_Y);
 //        Appoint_Adding_Line(1, , 95,79, 5);
+        Circle_Static_Flag = 1;
+//        circle_process_cnt++;
+        Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+    }
+    if(Circle_Static_Flag == 1)
+    {
+        Encoder_Distance_Start(&Circle_Out_Distance_Structure);
+        if(Encoder_Distance_MaxLimit(&Circle_Out_Distance_Structure, 90))
+        {
+            Circle_Static_Flag = 0;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+            return;
+        }
         Appoint_Adding_Line(1, 79, 5,5, 95);
-//        uart_write_string(UART_0, "Find_Left_Circle\r\n");
+
         circle_flag = 0;
         Left_Roundabout();
-        Circle_Static_Flag = 1;
-        circle_process_cnt++;
-        if((Lost_right_Flag == 0 && roundabout_Y > 25 && roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
+        if((Lost_right_Flag == 0 && roundabout_Y > 15 && roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
         {
             circle_process_cnt = 0;
             circle_flag = 0;
             Circle_Static_Flag = 2;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
         }
+
     }
     //右环岛
 //    if((roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
@@ -1317,7 +1347,22 @@ void Find_Circle(void)
     //左环岛
     if(Circle_Static_Flag == 2)
         {
-            circle_process_cnt++;
+//            if((Lost_right_Flag == 0 && roundabout_Y > 15 && roundabout_Flag == 1 && Circle_Static_Flag == 1)|| Circle_Static_Flag == 2)
+//            {
+//                circle_process_cnt = 0;
+//                circle_flag = 0;
+//                Circle_Static_Flag = 2;
+//                Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+//            }
+            Encoder_Distance_Start(&Circle_Out_Distance_Structure);
+            if(Encoder_Distance_MaxLimit(&Circle_Out_Distance_Structure, 60))
+            {
+                Circle_Static_Flag = 0;
+                Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+                return;
+            }
+
+//            circle_process_cnt++;
             Left_Roundabout();
 //            uart_write_string(UART_0, "Find_Left_RD\r\n");
     //        Beep_ShortRing();
@@ -1328,6 +1373,7 @@ void Find_Circle(void)
                 circle_process_cnt = 0;
                 Circle_Static_Flag = 3;
                 circle_flag = 1;
+                Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
             }
         }
     //拉线入环
@@ -1335,6 +1381,15 @@ void Find_Circle(void)
     {
 //        circle_process_cnt++;
 //        Appoint_Adding_Line(2, upper_left_inflection_X, upper_left_inflection_Y, right[32], 68);
+
+        Encoder_Distance_Start(&Circle_Out_Distance_Structure);
+        if(Encoder_Distance_MaxLimit(&Circle_Out_Distance_Structure, 150))
+        {
+            Circle_Static_Flag = 0;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+            return;
+        }
+
         Appoint_Adding_Line(2, 27, 19, right[80], 80);
         Middle_Empty_Set(1, 24, 2);
         Left_Roundabout();
@@ -1343,6 +1398,7 @@ void Find_Circle(void)
         {
             circle_process_cnt = 0;
             Circle_Static_Flag = 4;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
         }
     }
     //已经入环准备出环
@@ -1353,26 +1409,39 @@ void Find_Circle(void)
         if(circle_upper_right_inflection_flag == 1)
         {
             Circle_Static_Flag = 5;
-            circle_process_cnt = 0;
-            circle_out_cnt = 0;
+//            circle_process_cnt = 0;
+//            circle_out_cnt = 0;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
         }
     }
     if(Circle_Static_Flag == 5)
     {
         Circle_Upper_right();
         circle_out_cnt++;
+
+        Encoder_Distance_Start(&Circle_Out_Distance_Structure);
+        if(Encoder_Distance_MaxLimit(&Circle_Out_Distance_Structure, 110))
+        {
+            Circle_Static_Flag = 0;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+            return;
+        }
+
         if(circle_upper_right_inflection_flag == 1)
         {
-            Appoint_Adding_Line(2, 2, 24, circle_upper_right_inflection_X, circle_upper_right_inflection_Y);
+            Appoint_Adding_Line(2, 24, 2, circle_upper_right_inflection_X, circle_upper_right_inflection_Y);
 //            middle_empty_start_line = circle_upper_right_inflection_Y;
 //            middle_empty_end_line = 2;
-            Middle_Empty_Set(1, circle_upper_right_inflection_Y, 2);
+//            Middle_Empty_Set(1, circle_upper_right_inflection_Y, 2);
 //            Middle_Empty(1, circle_upper_right_inflection_Y, 2);
+            last_circle_upper_right_inflection_X = circle_upper_right_inflection_X;
+            last_circle_upper_right_inflection_Y = circle_upper_right_inflection_Y;
         }
         else
         {
-            Appoint_Adding_Line(2, 2, 24, right[90], 90);
-            Middle_Empty_Set(1, 40, 2);
+//            Appoint_Adding_Line(2, 24, 3, right[80], 80);
+            Appoint_Adding_Line(2, 24, 2, last_circle_upper_right_inflection_X, last_circle_upper_right_inflection_Y);
+//            Middle_Empty_Set(1, 40, 2);
 //            Middle_Empty(1, 40, 2);
         }
     }
@@ -1405,6 +1474,16 @@ void Find_Circle(void)
 
 //    if(Circle_Enter_Flag == 1 && lower_right_inflection_Flag == 0 && )
 }
+
+//void Circle_Encoder_Distance_Limit(Encoder_Distance_Typedef *Distance_Structure, float distance_max)
+//{
+//    Encoder_Distance_Start(&Distance_Structure);
+//    if(Encoder_Distance_MaxLimit(&Distance_Structure, distance_max))
+//    {
+//        Circle_Static_Flag = 0;
+//        return;
+//    }
+//}
 /***********************************************
 * @brief : 左环岛
 * @param : void
@@ -1696,8 +1775,12 @@ void Cross_Road(void)
             {
 //                Appoint_Adding_Line(1, left[lost_point_L_scan_line], lost_point_L_scan_line,78, 3);
 //                Appoint_Adding_Line(2, right[lost_point_R_scan_line], lost_point_R_scan_line,117, 3);
-                Appoint_Adding_Line(1, 78, 3,left[lost_point_L_scan_line], lost_point_L_scan_line);
-                Appoint_Adding_Line(2, 117, 3,right[lost_point_R_scan_line], lost_point_R_scan_line);
+
+//                Appoint_Adding_Line(1, 78, 3,left[lost_point_L_scan_line], lost_point_L_scan_line);
+//
+//                Appoint_Adding_Line(2, 117, 3,right[lost_point_R_scan_line], lost_point_R_scan_line);
+//                Appoint_Adding_Line(1, 79, 5,5, 95);
+//                Appoint_Adding_Line(2, 188-79, 120-5,188-5, 120-95);
 //                /*===左边补线===*/
 //                start=ten_inflexion_down_l+3;
 //                end=ten_inflexion_down_l+15;
@@ -1740,12 +1823,15 @@ void Cross_Road(void)
             }
 
             /*============进十字路口后进行补线(调用斜率截距函数和最小二乘法函数)===============*/
-            if(cross_road_status==2)
+            if(cross_road_status == 2 )
             {
 //                Appoint_Adding_Line(1, 5, 115,left[ten_inflexion_up_l], ten_inflexion_up_l);
 //                Appoint_Adding_Line(2, 185, 115,right[ten_inflexion_up_l], ten_inflexion_up_r);
-                Appoint_Adding_Line(1,left[ten_inflexion_up_l] , ten_inflexion_up_l,5, 115);
-                Appoint_Adding_Line(2, right[ten_inflexion_up_l], ten_inflexion_up_r,185, 115);
+
+//                Appoint_Adding_Line(1,left[ten_inflexion_up_l] , ten_inflexion_up_l,5, 115);
+//                Appoint_Adding_Line(2, right[ten_inflexion_up_l], ten_inflexion_up_r,185, 115);
+//                Appoint_Adding_Line(1, 79, 5,5, 95);
+//                Appoint_Adding_Line(2, 188-79, 120-5,188-5, 120-95);
                 /*===左边补线===*/
 //                start=ten_inflexion_up_l-13;
 //                end=ten_inflexion_up_l-3;
@@ -1952,8 +2038,14 @@ void Zebra_Crossing(void)
         edge_left_num = 0;
     if(edge_sum >= 16 && edge_left_num > 5 && edge_right_num > 5)                      //停车
     {
-        system_delay_ms(210);
+        static Encoder_Distance_Typedef Zebra_Crossing_Structure;
+        static uint8 zebra_crossing_break_flag = 0;
+//        system_delay_ms(210);
         zebra_crossing_flag = 1;
+        Zebra_Crossing_Structure.distance_record_status = close_status;
+        Encoder_Distance_Start(&Zebra_Crossing_Structure);
+        while(Encoder_Distance_MaxLimit(&Zebra_Crossing_Structure, 25));
+
         Car_Stop();
         Beep_ShortRing();
 //        system_delay_ms(1000);
@@ -1967,7 +2059,7 @@ void Zebra_Crossing(void)
 
 void Image_Process(void)
 {
-
+    static Encoder_Distance_Typedef Truck_Out_Distance_Structure;
     if(mt9v03x_finish_flag == 1)              //判断一幅图像是否接收完成
     {
 
@@ -2007,7 +2099,15 @@ void Image_Process(void)
 //            printf("%d ,%d ,%d\r\n ",target_left,target_right,g_camera_mid_err);
             camera_process_cnt++;
             camera_process_cnt_show++;
-
+            Encoder_Distance_Stop(&Truck_Out_Distance_Structure);
+        }
+        else
+        {
+            Encoder_Distance_Start(&Truck_Out_Distance_Structure);
+            if(Encoder_Distance_MaxLimit(&Truck_Out_Distance_Structure, 50))
+            {
+                Car_Stop();
+            }
         }
 //        pro_time = stop_time - start_time ;
         mt9v03x_finish_flag = 0;

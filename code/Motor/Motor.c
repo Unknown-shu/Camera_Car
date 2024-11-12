@@ -183,6 +183,15 @@ void Turn_Ctrl(void)
 //        target_right = straight_V0 + speed_delta ;
 //    }
 #if(MIDDLE_LINE_MODE == 1)
+    if(circle_flag == 1)
+    {
+        camera_horizon = 25;
+    }
+    else
+    {
+        camera_horizon = 10 ;
+//              + 0.5 * (abs(g_camera_mid_err))
+    }
     g_camera_mid_err = Camera_Get_MidErr();
     if(g_camera_mid_err == 0)
     {
@@ -201,10 +210,11 @@ void Turn_Ctrl(void)
         g_camera_mid_err = 0;
     }
     speed_delta = Positional_PID(&Turn_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 10);
-    V0 = basic_V0 - (abs(g_camera_mid_err));
+    V0 = basic_V0 - 1 * (abs(g_camera_mid_err));
+
     if(circle_flag == 1)
     {
-        V0 = 100 - (abs(g_camera_mid_err));
+        V0 = 137 - (abs(g_camera_mid_err));
     }
     target_left = V0 - speed_delta ;
     target_right = V0 + speed_delta ;
@@ -216,7 +226,7 @@ void Turn_Ctrl(void)
 ////    ips200_show_int(0, 200, middle_avg, 3);
 //    printf("%d,%d,%d\r\n",
 //            g_camera_mid_err, target_left, target_right);
-//    printf("%d\r\n",mid_err);
+//    printf("%d\r\n",g_camera_mid_err);
 
 }
 

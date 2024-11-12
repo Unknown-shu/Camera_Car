@@ -7,6 +7,13 @@ int switch_encoder_num = 0;
 int switch_encoder_change_num = 0;
 uint8 switch_encode_bring_flag;
 uint8 switch_encode_change_get_buff_flag = 0;                   //变化缓冲，谨防变化未用上就将变化值清零
+
+uint8 encoder_distance_open_flag = open_status;                           //是否启用里程计
+int left_encoder_distance_cnt = 0;
+int right_encoder_distance_cnt = 0;
+float left_encoder_distance = 0;
+float right_encoder_distance = 0;
+
 void MyEncoder_Init(void)
 {
     encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//左轮编码器
@@ -93,6 +100,13 @@ void GetSpeed(void)
  // 获取编码器的值
     Encoder_speed_l = -Encoder_MTM(TIM2_ENCODER,3,1);
     Encoder_speed_r = -Encoder_MTM(TIM6_ENCODER,3,1);
+    if(encoder_distance_open_flag == 1)
+    {
+        left_encoder_distance_cnt += Encoder_speed_l;
+        right_encoder_distance_cnt += Encoder_speed_r;
+        left_encoder_distance = left_encoder_distance_cnt * 0.00008797830909 * 100;
+        right_encoder_distance = right_encoder_distance_cnt * 0.00008797830909 * 100;
+    }
 //    Encoder_speed_r = -Encoder_MTM(TIM3_ENCODER,1,1);
     //JustFloat_Test();
 };
@@ -147,7 +161,7 @@ void Get_Switch_Num(void)
     if((last_switch_encoder_num == switch_encoder_num ) && switch_encode_change_get_buff_flag == 0)
     {
         switch_encoder_change_num = 0;
-        Beep_Stop();
+//        Beep_Stop();
     }
     last_switch_encoder_num = switch_encoder_num;
 
@@ -191,5 +205,135 @@ uint8 If_Switch_Encoder_Change(void)
     else
     {
         return 0;
+    }
+}
+
+/***********************************************
+* @brief : 获取编码器路程
+* @param : void
+* @return: void
+* @date  : 2024年11月9日13:26
+* @author: SJX
+* @note  : 单位cm
+************************************************/
+void Get_Encoder_Distance(Encoder_Distance_Typedef *Distance_Structure)
+{
+    if(Distance_Structure->distance_record_status == open_status)
+    {
+        Distance_StartPoint_Check(Distance_Structure);
+        Distance_Structure->left_distance = left_encoder_distance - Distance_Structure->left_distance_start_point;
+        Distance_Structure->right_distance = right_encoder_distance - Distance_Structure->right_distance_start_point;
+        Distance_Structure->AVG_distance = (Distance_Structure->left_distance + Distance_Structure->right_distance) / 2;
+    }
+    else
+    {
+        printf("Distance_Status is close ! pls sure code");
+    }
+}
+
+/***********************************************
+* @brief : 开启编码器里程记录
+* @param : 结构体地址
+* @return: void
+* @date  : 2024年11月9日13:31
+* @author: SJX
+************************************************/
+void Encoder_Distance_Start(Encoder_Distance_Typedef *Distance_Structure)
+{
+    if(Distance_Structure->distance_record_status == close_status)
+    {
+        Distance_Structure->distance_record_status = open_status;
+        Distance_Structure->left_distance_start_point = left_encoder_distance;
+        Distance_Structure->right_distance_start_point = right_encoder_distance;
+    }
+}
+
+/***********************************************
+* @brief : 结束编码器里程记录
+* @param : 结构体地址
+* @return: void
+* @date  : 2024年11月9日13:33
+* @author: SJX
+************************************************/
+void Encoder_Distance_Stop(Encoder_Distance_Typedef *Distance_Structure)
+{
+//    if(Distance_Structure.distance_record_status == open_status)
+//   {
+        Distance_Structure->distance_record_status = close_status;
+        Distance_Structure->left_distance_start_point = 0;
+        Distance_Structure->right_distance_start_point = 0;
+//   }
+}
+
+/***********************************************
+* @brief : 里程限幅判断
+* @param : *left_distance   左路程地址
+*          *right_distance  右路程地址
+*          distance_max     路程最大值,单位cm
+* @return: uint8            小于max值时返回0,大于1时返回0
+* @date  : 2024年11月10日14:49:35
+* @author: SJX
+* @exp   : Get_Encoder_Distance(&left_distance, &right_distance);
+*          i = Encoder_Distance_MaxLimit(&left_distance, &right_distance, 20);
+*          if(i == 1)   return 1;
+************************************************/
+uint8 Encoder_Distance_MaxLimit(Encoder_Distance_Typedef *Distance_Structure, float distance_max)
+{
+    if(Distance_Structure->distance_record_status == open_status)
+    {
+        Encoder_Distance_Start(Distance_Structure);
+        Get_Encoder_Distance(Distance_Structure);
+        if(Distance_Structure->AVG_distance < distance_max)
+        {
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+//uint8 Encoder_Distance_Left_MaxLimit(Encoder_Distance_Typedef *Distance_Structure, float left_distance_max, float right_distance_max)
+//{
+//    if(Distance_Structure->distance_record_status == open_status)
+//    {
+//        Encoder_Distance_Start(Distance_Structure);
+//        Get_Encoder_Distance(Distance_Structure);
+//        if(Distance_Structure->AVG_distance < left_distance_max)
+//        {
+//            return 0;
+//        }
+//        else
+//        {
+//            return 1;
+//        }
+//    }
+//    return 0;
+//}
+
+
+
+/***********************************************
+* @brief : 起点检查，确认起点打入
+* @param : 结构体地址
+* @return: uint8            小于max值时返回0,大于1时返回0
+* @date  : 2024年11月11日10:14:32
+* @author: SJX
+* @exp   :
+************************************************/
+void Distance_StartPoint_Check(Encoder_Distance_Typedef *Distance_Structure)
+{
+    float i, j;
+    i = fabs(Distance_Structure->left_distance_start_point - 0);
+    j = fabs(Distance_Structure->right_distance_start_point - 0);
+    if(i > 10E-7 && j > 10E-7)
+    {
+        return;
+    }
+    else
+    {
+//        printf("distance_start_point empty\r\n");
     }
 }
