@@ -210,12 +210,13 @@ void Turn_Ctrl(void)
         g_camera_mid_err = 0;
     }
     speed_delta = Positional_PID(&Turn_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 10);
-    V0 = basic_V0 - 1 * (abs(g_camera_mid_err));
+    V0 = basic_V0 - 1.1 * (abs(g_camera_mid_err));
 
     if(circle_flag == 1)
     {
-        V0 = 137 - (abs(g_camera_mid_err));
+//        V0 = 137 - (abs(g_camera_mid_err));
     }
+
     target_left = V0 - speed_delta ;
     target_right = V0 + speed_delta ;
     // 对 target_left 进行限幅

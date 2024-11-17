@@ -1257,16 +1257,16 @@ void Find_Circle(void)
     static uint16 circle_lost_cnt = 0;
     static uint16 circle_process_cnt = 0;
     static uint16 circle_out_cnt = 0;
-//    printf("%f\r\n",Circle_Out_Distance_Structure.AVG_distance);
+//    printf("%d, %f, %f\r\n",Circle_Static_Flag, Circle_Out_Distance_Structure.AVG_distance, Circle_Decide_Distance_Structure.AVG_distance);
 //    printf("%d, %d, %d, %d\r\n",left_straight_flag, right_straight_flag, Lost_left_Flag, Lost_right_Flag);
 //    if((left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 0 && Lost_right_Flag == 0 && Circle_Static_Flag <= 3)
 //                || cross_road_flag == 2 )
-    if((!(left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 1 && Lost_right_Flag == 0) && Circle_Static_Flag < 3)
+    if((!(left_straight_flag == 1 && right_straight_flag == 1 && Lost_left_Flag == 1 && Lost_right_Flag == 0) && Circle_Static_Flag < 2)
                 || cross_road_flag == 2 )
     //        && (Circle_Static_Flag <= 2 || Circle_Static_Flag >= 5))
         {
             Encoder_Distance_Start(&Circle_Decide_Distance_Structure);
-            if(Encoder_Distance_MaxLimit(&Circle_Decide_Distance_Structure, 10))
+            if(Encoder_Distance_MaxLimit(&Circle_Decide_Distance_Structure, 50))
             {
                 circle_lost_cnt = 0;
                 circle_process_cnt = 0;
@@ -1274,6 +1274,8 @@ void Find_Circle(void)
                 Circle_Static_Flag = 0;
                 circle_flag = 0;
                 Middle_Empty_Set(0, 40, 2);
+                Encoder_Distance_Stop(&Circle_Decide_Distance_Structure);
+//                Beep_Stop();
                 return ;
             }
         }
@@ -1304,14 +1306,24 @@ void Find_Circle(void)
 //    }
 //    //左圆环
 
-    if(Circle_Static_Flag == 0 && upper_right_inflection_flag == 0 && lower_left_inflection_Flag == 1 && lower_right_inflection_Flag == 0 )
+//    if(Circle_Static_Flag == 0 && )
+//    {
+////        uart_write_string(UART_0, "Find_Left_Circle\r\n");
+////        Slope_Adding_Line(1, lower_left_inflection_X, lower_left_inflection_Y);
+////        Appoint_Adding_Line(1, , 95,79, 5);
+//
+////        circle_process_cnt++;
+//
+////        Beep_Start();
+//    }
+    if(Circle_Static_Flag == 0)
     {
-//        uart_write_string(UART_0, "Find_Left_Circle\r\n");
-//        Slope_Adding_Line(1, lower_left_inflection_X, lower_left_inflection_Y);
-//        Appoint_Adding_Line(1, , 95,79, 5);
-        Circle_Static_Flag = 1;
-//        circle_process_cnt++;
-        Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+        if(upper_right_inflection_flag == 0 && lower_left_inflection_Flag == 1 && lower_right_inflection_Flag == 0 && right_straight_flag == 1)
+        {
+            Circle_Static_Flag = 1;
+            Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+            Encoder_Distance_Stop(&Circle_Decide_Distance_Structure);
+        }
     }
     if(Circle_Static_Flag == 1)
     {
@@ -1332,7 +1344,12 @@ void Find_Circle(void)
             circle_flag = 0;
             Circle_Static_Flag = 2;
             Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+            Encoder_Distance_Stop(&Circle_Decide_Distance_Structure);
         }
+//        if(right_straight_flag == 0)
+//        {
+//            Circle_Static_Flag = 0;
+//        }
 
     }
     //右环岛
@@ -1354,16 +1371,23 @@ void Find_Circle(void)
 //                Circle_Static_Flag = 2;
 //                Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
 //            }
+            Left_Roundabout();
             Encoder_Distance_Start(&Circle_Out_Distance_Structure);
-            if(Encoder_Distance_MaxLimit(&Circle_Out_Distance_Structure, 60))
+            if(Encoder_Distance_MaxLimit(&Circle_Out_Distance_Structure, 30))
             {
                 Circle_Static_Flag = 0;
                 Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+                Encoder_Distance_Stop(&Circle_Decide_Distance_Structure);
                 return;
+            }
+            if(roundabout_Flag == 1)
+            {
+                Encoder_Distance_Stop(&Circle_Out_Distance_Structure);
+//                Encoder_Distance_Stop(&Circle_Decide_Distance_Structure);
             }
 
 //            circle_process_cnt++;
-            Left_Roundabout();
+
 //            uart_write_string(UART_0, "Find_Left_RD\r\n");
     //        Beep_ShortRing();
 //            Appoint_Adding_Line(1, 187, 120,roundabout_X, roundabout_Y);
@@ -2072,7 +2096,7 @@ void Image_Process(void)
         {
             //八领域   圆环3ms一帧  直线1.8ms一帧
             Search_Line_BLY((uint16)USE_num, image, &data_stastics_l, &data_stastics_r, start_point_l[0], start_point_l[1], start_point_r[0], start_point_r[1], &Endline);
-            Growth_Direction();
+//            Growth_Direction();
             get_left(data_stastics_l);    //左边界提取
             get_right(data_stastics_r);   //右边界提取
             Zebra_Crossing();
@@ -2093,7 +2117,7 @@ void Image_Process(void)
 
             middle_line();                  //提取中线
             Middle_Empty();
-            Bend_Straight_Opinion();        //判断是否是直线
+//            Bend_Straight_Opinion();        //判断是否是直线
 //            g_camera_mid_err = Camera_Get_MidErr();
 //            printf("%d\r\n",g_camera_mid_err);
 //            printf("%d ,%d ,%d\r\n ",target_left,target_right,g_camera_mid_err);

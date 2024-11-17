@@ -32,6 +32,8 @@ extern uint8 left_copy[120];
 extern uint8 right_copy[120];
 extern uint8 middle_copy[120];
 extern uint8 camera_horizon;
+extern uint8 cross_road_status;
+extern uint8 Circle_Static_Flag;
 
 float absolute(float z);
 void MyCamera_Init(void);                                       //…„œÒÕ∑≥ı ºªØ

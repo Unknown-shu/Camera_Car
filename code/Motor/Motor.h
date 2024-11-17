@@ -11,7 +11,7 @@
 #include "MyEncoder.h"
 #include "MyCamera.h"
 
-#define MOTOR_PWM_MAX 8000
+#define MOTOR_PWM_MAX 9900
 #define MOTOR_PWM_MIN -8000
 
 extern int target_left,target_right;

@@ -41,6 +41,8 @@ void Car_Start(void)
     PID_clear(&Motor_Speed_PID_Right);
     PID_clear(&Turn_Speed_PID);
     PID_clear(&Straight_Speed_PID);
+    Circle_Static_Flag = 0;
+    cross_road_status = 0;
     pit_enable(CCU61_CH0);
 }
 

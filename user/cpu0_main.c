@@ -114,7 +114,7 @@ int core0_main(void)
 	ips200_set_color(RGB565_WHITE, RGB565_BLACK);
 	ips200_clear();
 
-//	Wifi_Image_Init();
+	Wifi_Image_Init();
 
 	Beep_MediumRing(); //…œµÁ∑‰√˘
 	Init_End_Flag = 1;
