@@ -19,7 +19,10 @@
 #include "Status.h"
 #include "WIFI_IMAGE.H"
 #include "Sys.h"
-
-
-
+#include "Gyroscope_Process.h"
+#include "Gyroscope.h"
+#include "balance.h"
+#include "small_driver_uart_control.h"
+#include "Servo.h"
+#include "body_contral.h"
 #endif

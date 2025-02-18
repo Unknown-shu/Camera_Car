@@ -12,6 +12,12 @@ PID_IncTypeDef Motor_Speed_PID_Left;
 PID_IncTypeDef Motor_Speed_PID_Right;
 PID_IncTypeDef Turn_Speed_PID;
 PID_IncTypeDef Straight_Speed_PID;
+PID_IncTypeDef Speed_PID;
+PID_IncTypeDef Angle_PID;
+PID_IncTypeDef Angle_AccPID;
+
+PID_IncTypeDef Speedcirle_PID;
+PID_IncTypeDef Angleroll_PID;
 
 void PID_param_init(void)
 {
@@ -19,6 +25,13 @@ void PID_param_init(void)
     PID_Inc_Init(&Motor_Speed_PID_Right, motor_speed_Right_Kp, motor_speed_Right_Ki, 0);
     PID_Inc_Init(&Turn_Speed_PID,turn_speed_Kp, turn_speed_Ki, turn_speed_Kd);
     PID_Inc_Init(&Straight_Speed_PID,straight_speed_Kp, straight_speed_Ki, straight_speed_Kd);
+    PID_Inc_Init(&Speed_PID, 0, 0, 0 );
+    PID_Inc_Init(&Angle_PID, 30, 0, 0 );
+    PID_Inc_Init(&Angle_AccPID, 30, 1, 0 );
+
+    PID_Inc_Init(&Speedcirle_PID, 10, 0, 0 );
+    PID_Inc_Init(&Angleroll_PID, 10, 0, 0 );
+
 }
 
 /*

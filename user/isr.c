@@ -63,30 +63,31 @@ IFX_INTERRUPT(cc60_pit_ch1_isr, 0, CCU6_0_CH1_ISR_PRIORITY)
 IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
 {
         Beep_Timer_ShortRing_Stop();
+//        get_gyorscope_data();
         SysTimer_Stop();
 //        Track_Out_Protect();
-//    interrupt_global_enable(0);                     // 开启中断嵌套
+        interrupt_global_enable(0);                     // 开启中断嵌套
+
+        GetSpeed();
+
+//        Balance_Speed();
+        Balance_Angle();
 
         if(g_Car_Status == status_car_start)
         {
-
+            Balance_Angle_acc();
+            body_contral();
+//            Seekfree_FOC_Duty_Set(1200, 1200);
         }
-//        GetSpeed();
-//        MotorCtrl();
-        if(g_Car_Status != status_car_gyroscope_run)
-        {
-            Turn_Ctrl();
-        }
-
-        if(g_Car_Status == status_car_stop)
+        else if(g_Car_Status == status_car_stop)
         {
             Car_Stop();
         }
-        GetSpeed();
-        MotorCtrl();
-        pit_clear_flag(CCU61_CH0);
+
         SysTimer_Start();
         Get_Switch_Num();
+        pit_clear_flag(CCU61_CH0);
+
 
 }
 
@@ -221,6 +222,7 @@ IFX_INTERRUPT(uart1_rx_isr, UART1_INT_VECTAB_NUM, UART1_RX_INT_PRIO)
 {
     interrupt_global_enable(0);                     // 开启中断嵌套
     camera_uart_handler();                          // 摄像头参数配置统一回调函数
+    uart_control_callback();
 }
 
 // 串口2默认连接到无线转串口模块

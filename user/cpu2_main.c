@@ -59,26 +59,26 @@ void core2_main(void)
 
     // 此处编写用户代码 例如外设初始化代码等
     cpu_wait_event_ready();                 // 等待所有核心初始化完毕
-    while(Init_End_Flag == 0);
-    uint8 i;
+//    while(Init_End_Flag == 0);
+//    uint8 i;
     while (TRUE)
     {
         // 此处编写需要循环执行的代码
 //        printf("111");
-        if(g_wifi_image_open_flag == 1 )
-        {
-            Camera_Wifi_Image_Send_Flag = 0;
-
-            seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_copy[0], MT9V03X_W, MT9V03X_H);
-//            seekfree_assistant_camera_boundary_config(X_BOUNDARY, MT9V03X_H, (uint8)left, (uint8)right, (uint8)middle, NULL, NULL, NULL);
-            seekfree_assistant_camera_boundary_config(X_BOUNDARY, MT9V03X_H, left_copy, right_copy, middle_copy, NULL, NULL, NULL);
-        }
-//        system_delay_ms(2);
-        if(g_wifi_image_open_flag == 1 )
-        {
-//            printf("111");
-            Wifi_Image_Send_Camera();
-        }
+//        if(g_wifi_image_open_flag == 1 )
+//        {
+//            Camera_Wifi_Image_Send_Flag = 0;
+//
+//            seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_copy[0], MT9V03X_W, MT9V03X_H);
+////            seekfree_assistant_camera_boundary_config(X_BOUNDARY, MT9V03X_H, (uint8)left, (uint8)right, (uint8)middle, NULL, NULL, NULL);
+//            seekfree_assistant_camera_boundary_config(X_BOUNDARY, MT9V03X_H, left_copy, right_copy, middle_copy, NULL, NULL, NULL);
+//        }
+////        system_delay_ms(2);
+//        if(g_wifi_image_open_flag == 1 )
+//        {
+////            printf("111");
+//            Wifi_Image_Send_Camera();
+//        }
 //        if(switch_encode_bring_flag)
 //        {
 //            switch_encode_bring_flag = 0;

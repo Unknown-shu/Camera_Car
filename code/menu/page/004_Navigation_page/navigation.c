@@ -18,7 +18,7 @@ uint8 Test;
 
 void navigation_page_process(int Event_Code)
 {
-    line_number_max=13;
+    line_number_max=10;
     static uint16 i = 0;
     static uint16 Test = 0;
    //显示菜单
@@ -26,67 +26,54 @@ void navigation_page_process(int Event_Code)
 
     enter_flag += Test;
 //    printf("%d\r\n",enter_flag);
+    ips200_show_float(VAL_SHOW_START_COL-8, 18 * 11,pitch[0] , 3, VAL_SHOW_POINT_BIT);
+
     if(enter_flag > 0 || If_Switch_Encoder_Change() == 1)
     {
         Line_Num_Flush(&line_number);
         i = 0;
         enter_flag = 0;
 
+        Menu_Exit_Show(line_number);
         // Left Speed PID
-        if (line_number != 1)     ips200_show_string_color(0, 18 * 1, "Left_Speed_KP", PenColor);
-        else                      ips200_show_string_color(0, 18 * 1, "Left_Speed_KP", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 1, Motor_Speed_PID_Left.Kp, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 2)     ips200_show_string_color(0, 18 * 2, "Left_Speed_Ki", PenColor);
-        else                      ips200_show_string_color(0, 18 * 2, "Left_Speed_Ki", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 2, Motor_Speed_PID_Left.Ki, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 3)     ips200_show_string_color(0, 18 * 3, "Left_Speed_Kd", PenColor);
-        else                      ips200_show_string_color(0, 18 * 3, "Left_Speed_Kd", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 3, Motor_Speed_PID_Left.Kd, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+        Menu_Display_Line_Float_Parameter(line_number, 2, "Speed_KP", Speed_PID.Kp);
+        Menu_Display_Line_Float_Parameter(line_number, 3, "Speed_Ki", Speed_PID.Ki);
+        Menu_Display_Line_Float_Parameter(line_number, 4, "Speed_Kd", Speed_PID.Kd);
 
         // Right Speed PID
-        if (line_number != 4)     ips200_show_string_color(0, 18 * 4, "Right_Speed_KP", PenColor);
-        else                      ips200_show_string_color(0, 18 * 4, "Right_Speed_KP", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 4, Motor_Speed_PID_Right.Kp, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 5)     ips200_show_string_color(0, 18 * 5, "Right_Speed_Ki", PenColor);
-        else                      ips200_show_string_color(0, 18 * 5, "Right_Speed_Ki", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 5, Motor_Speed_PID_Right.Ki, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 6)     ips200_show_string_color(0, 18 * 6, "Right_Speed_Kd", PenColor);
-        else                      ips200_show_string_color(0, 18 * 6, "Right_Speed_Kd", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 6, Motor_Speed_PID_Right.Kd, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+        Menu_Display_Line_Float_Parameter(line_number, 5, "Angle_KP", Angle_PID.Kp);
+        Menu_Display_Line_Float_Parameter(line_number, 6, "Angle_Ki", Angle_PID.Ki);
+        Menu_Display_Line_Float_Parameter(line_number, 7, "Angle_Kd", Angle_PID.Kd);
 
         // Turn Speed PID
-        if (line_number != 7)     ips200_show_string_color(0, 18 * 7, "Turn_Speed_KP", PenColor);
-        else                      ips200_show_string_color(0, 18 * 7, "Turn_Speed_KP", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 7, Turn_Speed_PID.Kp, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+        Menu_Display_Line_Float_Parameter(line_number, 8, "Angle_Acc_KP", Angle_AccPID.Kp);
+        Menu_Display_Line_Float_Parameter(line_number, 9, "Angle_Acc_Ki", Angle_AccPID.Ki);
+        Menu_Display_Line_Float_Parameter(line_number, 10, "Angle_Acc_Kd", Angle_AccPID.Kd);
 
-        if (line_number != 8)     ips200_show_string_color(0, 18 * 8, "Turn_Speed_Ki", PenColor);
-        else                      ips200_show_string_color(0, 18 * 8, "Turn_Speed_Ki", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 8, Turn_Speed_PID.Ki, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+        Menu_Display_Line_Float_Parameter(line_number, 11, "Angleroll_KP", Angleroll_PID.Kp);
+        Menu_Display_Line_Float_Parameter(line_number, 12, "Angleroll_Ki", Angleroll_PID.Ki);
+        Menu_Display_Line_Float_Parameter(line_number, 13, "Angleroll_Kd", Angleroll_PID.Kd);
 
-        if (line_number != 9)     ips200_show_string_color(0, 18 * 9, "Turn_Speed_Kd", PenColor);
-        else                      ips200_show_string_color(0, 18 * 9, "Turn_Speed_Kd", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 9, Turn_Speed_PID.Kd, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 10)     ips200_show_string_color(0, 18 * 10, "basic_V0", PenColor);
-        else                       ips200_show_string_color(0, 18 * 10, "basic_V0", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18*10, basic_V0, 3, 2);
-
-        // Straight Speed PID
-        if (line_number != 11)    ips200_show_string_color(0, 18 * 11, "Straight_Speed_KP", PenColor);
-        else                      ips200_show_string_color(0, 18 * 11, "Straight_Speed_KP", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 11, Straight_Speed_PID.Kp, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 12)    ips200_show_string_color(0, 18 * 12, "Straight_Speed_Ki", PenColor);
-        else                      ips200_show_string_color(0, 18 * 12, "Straight_Speed_Ki", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 12, Straight_Speed_PID.Ki, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
-
-        if (line_number != 13)    ips200_show_string_color(0, 18 * 13, "Straight_Speed_Kd", PenColor);
-        else                      ips200_show_string_color(0, 18 * 13, "Straight_Speed_Kd", PenColor_else);
-        ips200_show_float(VAL_SHOW_START_COL, 18 * 13, Straight_Speed_PID.Kd, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+        Menu_Display_Line_Float_Parameter(line_number, 14, "Speedcirle_KP", Speedcirle_PID.Kp);
+        Menu_Display_Line_Float_Parameter(line_number, 15, "Speedcirle_Ki", Speedcirle_PID.Ki);
+        Menu_Display_Line_Float_Parameter(line_number, 16, "Speedcirle_Kd", Speedcirle_PID.Kd);
+        ips200_show_string_color(0, 18 * 11, "Pitch:", PenColor_else);
+//        if (line_number != 10)     ips200_show_string_color(0, 18 * 10, "basic_V0", PenColor);
+//        else                       ips200_show_string_color(0, 18 * 10, "basic_V0", PenColor_else);
+//        ips200_show_float(VAL_SHOW_START_COL, 18*10, basic_V0, 3, 2);
+//
+//        // Straight Speed PID
+//        if (line_number != 11)    ips200_show_string_color(0, 18 * 11, "Straight_Speed_KP", PenColor);
+//        else                      ips200_show_string_color(0, 18 * 11, "Straight_Speed_KP", PenColor_else);
+//        ips200_show_float(VAL_SHOW_START_COL, 18 * 11, Straight_Speed_PID.Kp, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+//
+//        if (line_number != 12)    ips200_show_string_color(0, 18 * 12, "Straight_Speed_Ki", PenColor);
+//        else                      ips200_show_string_color(0, 18 * 12, "Straight_Speed_Ki", PenColor_else);
+//        ips200_show_float(VAL_SHOW_START_COL, 18 * 12, Straight_Speed_PID.Ki, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
+//
+//        if (line_number != 13)    ips200_show_string_color(0, 18 * 13, "Straight_Speed_Kd", PenColor);
+//        else                      ips200_show_string_color(0, 18 * 13, "Straight_Speed_Kd", PenColor_else);
+//        ips200_show_float(VAL_SHOW_START_COL, 18 * 13, Straight_Speed_PID.Kd, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
     }
     Test = Key_IfEnter();
 
@@ -118,47 +105,57 @@ void navigation_page_process(int Event_Code)
         switch(line_number)
         {
             case 1:
-                menu_Val_CFG(&Motor_Speed_PID_Left.Kp, 18 * 1, 1);
+                Set_Menu(&menu, MAIN_PAGE);
+                ips200_clear();
                 break;
             case 2:
-                menu_Val_CFG(&Motor_Speed_PID_Left.Ki, 18 * 2, 0.1);
+                menu_Val_CFG(&Speed_PID.Kp, 18 * line_number, 1);
                 break;
             case 3:
-                menu_Val_CFG(&Motor_Speed_PID_Left.Kd, 18 * 3, 1);
+                menu_Val_CFG(&Speed_PID.Ki, 18 * line_number, 0.1);
+                break;
+            case 4:
+                menu_Val_CFG(&Speed_PID.Kd, 18 * line_number, 1);
                 break;
 
             // 右轮速度PID参数调整
-            case 4:
-                menu_Val_CFG(&Motor_Speed_PID_Right.Kp, 18 * 4, 1);
-                break;
             case 5:
-                menu_Val_CFG(&Motor_Speed_PID_Right.Ki, 18 * 5, 0.1);
+                menu_Val_CFG(&Angle_PID.Kp, 18 * line_number, 1);
                 break;
             case 6:
-                menu_Val_CFG(&Motor_Speed_PID_Right.Kd, 18 * 6, 1);
+                menu_Val_CFG(&Angle_PID.Ki, 18 * line_number, 0.1);
+                break;
+            case 7:
+                menu_Val_CFG(&Angle_PID.Kd, 18 * line_number, 1);
                 break;
 
             // 转向PID参数调整
-            case 7:
-                menu_Val_CFG(&Turn_Speed_PID.Kp, 18 * 7, 0.1);
-                break;
             case 8:
-                menu_Val_CFG(&Turn_Speed_PID.Ki, 18 * 8, 0.1);
+                menu_Val_CFG(&Angle_AccPID.Kp, 18 * line_number, 0.1);
                 break;
             case 9:
-                menu_Val_CFG(&Turn_Speed_PID.Kd, 18 * 9, 1);
+                menu_Val_CFG(&Angle_AccPID.Ki, 18 * line_number, 0.1);
                 break;
             case 10:
-                menu_Val_CFG(&basic_V0, 18 * 10, 50);
+                menu_Val_CFG(&Angle_AccPID.Kd, 18 * line_number, 1);
                 break;
             case 11:
-                menu_Val_CFG(&Straight_Speed_PID.Kp, 18 * 11, 0.1);
+                menu_Val_CFG(&Angleroll_PID.Kp, 18 * line_number, 0.1);
                 break;
             case 12:
-                menu_Val_CFG(&Straight_Speed_PID.Ki, 18 * 12, 0.1);
+                menu_Val_CFG(&Angleroll_PID.Ki, 18 * line_number, 0.1);
                 break;
             case 13:
-                menu_Val_CFG(&Straight_Speed_PID.Kd, 18 * 13, 1);
+                menu_Val_CFG(&Angleroll_PID.Kd, 18 * line_number, 1);
+                break;
+            case 14:
+                menu_Val_CFG(&Speedcirle_PID.Kp, 18 * line_number, 0.1);
+                break;
+            case 15:
+                menu_Val_CFG(&Speedcirle_PID.Ki, 18 * line_number, 0.1);
+                break;
+            case 16:
+                menu_Val_CFG(&Speedcirle_PID.Kd, 18 * line_number, 1);
                 break;
             default:
                 break ;

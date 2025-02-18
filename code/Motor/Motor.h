@@ -1,7 +1,7 @@
 #ifndef  _Motor_H
 #define  _Motor_H
 
-#define MOTOR_MODE 1            //1是双路PWM，0是一路方向一路PWM
+#define MOTOR_MODE 2            //1是双路PWM，0是一路方向一路PWM, 2是seekfree foc
 #define MIDDLE_LINE_MODE    1   //1是不使用权重，2是使用权重
 
 #include "PIN.H"
@@ -10,6 +10,7 @@
 #include "PID.h"
 #include "MyEncoder.h"
 #include "MyCamera.h"
+#include "small_driver_uart_control.h"
 
 #define MOTOR_PWM_MAX 9900
 #define MOTOR_PWM_MIN -8000
@@ -28,10 +29,21 @@ extern int pwm_left, pwm_right;
 // 备注信息
 #define     func_limit_ab(x, a, b)  ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))
 
+#if MOTOR_MODE == 2
+
+void Motor_Init(void);
+void Seekfree_FOC_Duty_Set(int16 left_duty, int16 right_duty);
+void Motor_Stop(void);
+
+#endif
+
+#if MOTOR_MODE == 1
 void Motor_Init(void);
 void MotorSetPWM(int pwm_left,int pwm_right);
 void MotorCtrl(void);
 void Turn_Ctrl(void);
 void Motor_Stop(void);
+#endif
+
 
 #endif

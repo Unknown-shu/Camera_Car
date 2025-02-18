@@ -31,6 +31,7 @@ Car_Status Get_Car_Status(void);
 void Car_Starus_Flush(void);
 void Track_Out_Protect(void);
 void Gyroscope_Run(void);
+void Key_RUN(void);
 
 
 #endif

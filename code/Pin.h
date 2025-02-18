@@ -2,7 +2,8 @@
 #define __PIN_H__
 
 #include "MOTOR.h"
-#define Beep P33_10                                     //蜂鸣器引脚
+
+#define Beep P33_10                             //蜂鸣器引脚
 
 #define ENCODER_L         TIM2_ENCODER_CH1_P33_7        //左编码器计数引脚
 #define ENCODER_DIR_L     TIM2_ENCODER_CH2_P33_6        //左编码器方向引脚

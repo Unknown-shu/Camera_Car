@@ -14,6 +14,8 @@ typedef struct
         float AVG_distance;
 }Encoder_Distance_Typedef;
 
+extern int16 motor_speed_l;
+extern int16 motor_speed_r;
 
 extern int16 Encoder_speed_l;
 extern int16 Encoder_speed_r;

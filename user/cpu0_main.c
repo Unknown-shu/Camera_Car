@@ -86,11 +86,11 @@ int core0_main(void)
     // 此处编写用户代码 例如外设初始化代码等
 
     uint8 FPS;
-    Encoder_Distance_Typedef Distance_Test_Structure;
 
     system_delay_init();            //延迟初始化
     Menu_init();                    //菜单初始化
     Beep_Init();                    //蜂鸣器初始化
+
     ips200_init(IPS200_TYPE);       //屏幕初始化
     MyCamera_Init();                //摄像头初始化
     MyEncoder_Init();               //编码器初始化
@@ -98,15 +98,17 @@ int core0_main(void)
     PID_param_init();               //PID参数初始化
     key_init(20);                   //按键初始化
     UART_Init();                    //串口初始化
+    small_driver_uart_init();
+    Servo_Init();
 
-
+    gyroscope_init();
 
     pit_ms_init(CCU60_CH0, 20);     //按键扫描中断初始化
     pit_ms_init(CCU60_CH1, 1000);     //按键扫描中断初始化
-    pit_ms_init(CCU61_CH0, 5);     //pid中断
-
+    pit_ms_init(CCU61_CH0, 1);     //pid中断
 
     Flash_Init();
+
     // 此处编写用户代码 例如外设初始化代码等
 	cpu_wait_event_ready();         // 等待所有核心初始化完毕
 
@@ -114,57 +116,32 @@ int core0_main(void)
 	ips200_set_color(RGB565_WHITE, RGB565_BLACK);
 	ips200_clear();
 
-	Wifi_Image_Init();
+//	Wifi_Image_Init();
 
 	Beep_MediumRing(); //上电蜂鸣
 	Init_End_Flag = 1;
 
-
 //	Gyroscope_Run();
+
 
     while (TRUE)
     {
 
         // 此处编写需要循环执行的代码
+        Key_RUN();
         if(g_Car_Status == 0 || g_started_debug == 1)
             Menu_Handler(&menu);
         else if (Key_IfEnter())
         {
             Car_Stop();
-        }
-        if(key_get_state(KEY_6) == KEY_SHORT_PRESS)
-        {
-//            Beep_LongRing();
-            Beep_ShortRing();
-            Car_Start();
-//            key_clear_all_state();
-        }
-//        Encoder_Distance_Start(&Distance_Test_Structure);
-//        if(Encoder_Distance_MaxLimit(&Distance_Test_Structure, 20))
-//        {
-//            Beep_MediumRing();
-//        }
-//        Get_Encoder_Distance(&Distance_Test_Structure);
-//        printf("%f\r\n", Distance_Test_Structure.AVG_distance);
 
-
-//      FPS = 1000 / g_past_time ;
-//        ips200_show_int(204,0 , FPS, 3);
+        }
+//        printf("%d\r\n", g_Car_Status);
         ips200_show_int(188, 0, camera_process_FPS, 5);
-//        ips200_show_float(50, 18*5, rd_calculate, 4, 6);
-//        ips200_show_int(188, 18, g_past_time, 5);
-//        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, middle[0], MT9V03X_W, MT9V03X_H);
-//        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, left[0], MT9V03X_W, MT9V03X_H);
-//        seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, right[0], MT9V03X_W, MT9V03X_H);
-//	    ips200_show_int(204,0 , enter_flag, 3);
-//	    printf("%d ,%d ,%d ,%d, %d, %d\r\n ",target_left,target_right,Encoder_speed_l,Encoder_speed_r,pwm_left, pwm_right);
-//
-//	    printf("%d\r\n",V0);
-        // 此处编写需要循环执行的代码
 
-//	    printf("%d\r\n",switch_encoder_num);
-//	    uart_write_string(UART_2, "Test\r\n");
-//        printf("%d\r\n",switch_encoder_change_num);
+//        Seekfree_FOC_Duty_Set(1200, 1200);
+
+//        printf("%f, %f, %f\r\n",pitch[0], roll[0], yaw[0]);
 	}
 }
 

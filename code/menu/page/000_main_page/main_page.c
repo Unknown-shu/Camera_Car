@@ -18,20 +18,26 @@ void main_page_process(int Event_Code)
     ips200_show_chinese(105, 0, 16, chinese16[0], 2, PenColor);
 
 //  1.组合导航
-    if(line_number!=1) ips200_show_string_color(0, 18,"START", PenColor);
-    else              ips200_show_string_color(0, 18,"START", PenColor_else);
-
-    if(line_number!=2) ips200_show_string_color(0, 18*2,"Config", PenColor);
-    else              ips200_show_string_color(0, 18*2,"Config", PenColor_else);
+//    if(line_number!=1) ips200_show_string_color(0, 18,"START", PenColor);
+//    else              ips200_show_string_color(0, 18,"START", PenColor_else);
+    Menu_Display_Line_String(line_number, 1, "START");
+    Menu_Display_Line_String(line_number, 2, "Config");
+    Menu_Display_Line_String(line_number, 3, "Value");
+    Menu_Display_Line_String(line_number, 4, "Camera");
+//    if(line_number!=2) ips200_show_string_color(0, 18*2,"Config", PenColor);
+//    else              ips200_show_string_color(0, 18*2,"Config", PenColor_else);
 ////   2.电机控制
-    if(line_number!=3) ips200_show_string_color(0, 18*3,"Value", PenColor);
-     else              ips200_show_string_color(0, 18*3,"Value", PenColor_else);
+//    if(line_number!=3) ips200_show_string_color(0, 18*3,"Value", PenColor);
+//     else              ips200_show_string_color(0, 18*3,"Value", PenColor_else);
 //
-    if(line_number!=4) ips200_show_string_color(0, 18*4,"Camera", PenColor);
-     else              ips200_show_string_color(0, 18*4,"Camera", PenColor_else);
+//    if(line_number!=4) ips200_show_string_color(0, 18*4,"Camera", PenColor);
+//     else              ips200_show_string_color(0, 18*4,"Camera", PenColor_else);
+//
+//    if(line_number!=5) ips200_show_string_color(0, 18*5,"", PenColor);
+//     else              ips200_show_string_color(0, 18*5,"", PenColor_else);
+    ips200_show_string_color(0, 18 * 10, "Pitch:", PenColor_else);
+    ips200_show_float(162-8, 18 * 10,pitch[0] , 3, 3);
 
-    if(line_number!=5) ips200_show_string_color(0, 18*5,"", PenColor);
-     else              ips200_show_string_color(0, 18*5,"", PenColor_else);
 
 //    ips200_show_string_color(0, 18*5,"L:", PenColor_else);
 //    ips200_show_int(32, 18*5, target_left, 3);

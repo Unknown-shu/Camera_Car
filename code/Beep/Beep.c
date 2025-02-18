@@ -1,7 +1,8 @@
 #include "MYHEADFILE.h"
 
-uint8 g_switch_encoder_ring_flag = 0;
 
+
+uint8 g_switch_encoder_ring_flag = 0;
 void Beep_Init(void)
 {
     gpio_init(Beep, GPO, 0, GPO_PUSH_PULL);

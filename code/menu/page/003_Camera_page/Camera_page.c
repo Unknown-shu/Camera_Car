@@ -30,8 +30,8 @@ void Camera_page_process(int Event_Code)
         ips200_show_string(0, 155+18*3, "Target_R:");
     }
 
-    ips200_show_int(160, 155, Encoder_speed_l, 5);
-    ips200_show_int(160, 155+18, Encoder_speed_r, 5);
+    ips200_show_int(160, 155, motor_speed_l, 5);
+    ips200_show_int(160, 155+18, motor_speed_r, 5);
     ips200_show_int(160, 155+18*2, target_left, 5);
     ips200_show_int(160, 155+18*3, target_right, 5);
 

@@ -41,6 +41,9 @@ void Car_Start(void)
     PID_clear(&Motor_Speed_PID_Right);
     PID_clear(&Turn_Speed_PID);
     PID_clear(&Straight_Speed_PID);
+    PID_clear(&Angle_AccPID);
+    PID_clear(&Angle_PID);
+    PID_clear(&Speed_PID);
     Circle_Static_Flag = 0;
     cross_road_status = 0;
     pit_enable(CCU61_CH0);
@@ -132,6 +135,30 @@ void Gyroscope_Run(void)
        }while( Gyroscope_Run_Distance_Structure.left_distance < 221 ||  Gyroscope_Run_Distance_Structure.right_distance > -221);
 //    pit_start(CCU61_CH0);
     Car_Stop();
+}
+/***********************************************
+* @brief : 按键发车停车
+* @param : void
+* @return: void
+* @date  : 2024年12月7日19:38:02
+* @author: SJX
+************************************************/
+void Key_RUN(void)
+{
+    if(key_get_state(KEY_6) == KEY_SHORT_PRESS)
+    {
+        Beep_ShortRing();
+        if(g_Car_Status == status_car_stop)
+        {
+            Car_Start();
+        }
+        else
+        {
+            Car_Stop();
+        }
+        key_clear_state(KEY_6);
+
+    }
 }
 
 

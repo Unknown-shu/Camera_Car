@@ -3,6 +3,9 @@
 int16 Encoder_speed_l = 0;
 int16 Encoder_speed_r = 0;
 
+int16 motor_speed_l = 0;
+int16 motor_speed_r = 0;
+
 int switch_encoder_num = 0;
 int switch_encoder_change_num = 0;
 uint8 switch_encode_bring_flag;
@@ -16,8 +19,8 @@ float right_encoder_distance = 0;
 
 void MyEncoder_Init(void)
 {
-    encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//×óÂÖ±àÂëÆ÷
-    encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//ÓÒÂÖ±àÂëÆ÷
+//    encoder_dir_init(TIM2_ENCODER, ENCODER_L, ENCODER_DIR_L);//×óÂÖ±àÂëÆ÷
+//    encoder_dir_init(TIM6_ENCODER, ENCODER_R, ENCODER_DIR_R);//ÓÒÂÖ±àÂëÆ÷
     encoder_quad_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 //    encoder_dir_init(TIM3_ENCODER, Switch_ENCODER_L, Switch_ENCODER_R);
 
@@ -98,6 +101,9 @@ int16 Encoder_MTM(encoder_index_enum gptn,int n,uint8 direct)
 void GetSpeed(void)
 {
  // »ñÈ¡±àÂëÆ÷µÄÖµ
+    motor_speed_l = motor_value.receive_left_speed_data;
+    motor_speed_r = motor_value.receive_right_speed_data;
+
     Encoder_speed_l = -Encoder_MTM(TIM2_ENCODER,3,1);
     Encoder_speed_r = -Encoder_MTM(TIM6_ENCODER,3,1);
     if(encoder_distance_open_flag == 1)
@@ -121,6 +127,7 @@ void GetSpeed(void)
 void Get_Switch_Num(void)
 {
     int tmp = 0;
+    static int i = 0;
     static int encoder_cnt, timer_cnt, last_switch_encoder_num = 0;
     timer_cnt = -My_Switch_encoder_get_count(TIM3_ENCODER);
     encoder_clear_count(TIM3_ENCODER);
@@ -144,8 +151,7 @@ void Get_Switch_Num(void)
         encoder_cnt = 0;
         encoder_cnt += tmp;
     }
-//    printf("%d, %d, %d, %d\r\n", switch_encoder_change_num, switch_encode_change_get_buff_flag,
-//            last_switch_encoder_num, switch_encoder_num);
+
     if((last_switch_encoder_num != switch_encoder_num ) && switch_encode_change_get_buff_flag == 0)
     {
         switch_encode_change_get_buff_flag = 1;
@@ -164,7 +170,20 @@ void Get_Switch_Num(void)
 //        Beep_Stop();
     }
     last_switch_encoder_num = switch_encoder_num;
-
+    if(encoder_cnt != 0)
+    {
+//        printf("Test\r\n");
+        i++;
+        if(i > 200)
+        {
+            i = 0;
+            encoder_cnt = 0;
+        }
+    }
+    else
+        i = 0;
+//    printf("%d, %d, %d, %d\r\n", switch_encoder_change_num, i,
+//            last_switch_encoder_num, encoder_cnt);
 
 }
 /***********************************************

@@ -81,5 +81,9 @@ void menu_Val_CFG_Arrow_Show(uint16 page_start_row,uint16 line_num);
 void menu_Set_CFG_OpenClose_Show(uint16 page_start_row, uint8 value);
 void menu_Set_CFG_Value_Toggle(uint8 *value);
 void Line_Num_Flush(int8 *line_num);
+//void IPS200_Full_Parts(uint16 start_X, uint16 end_X, uint16 start_Y, uint16 end_Y);
+void Menu_Exit_Show(uint8 line_number);
+void Menu_Display_Line_String(uint8 line_number, uint8 show_number, const char *str );
+void Menu_Display_Line_Float_Parameter(uint8 line_number, uint8 show_number, const char *str, float value);
 
 #endif /* CODE_CPU2_MENU_CORE_MENU_H_ */

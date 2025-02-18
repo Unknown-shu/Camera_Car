@@ -156,8 +156,8 @@ void Menu_Handler(struct Menu *handle)
 ************************************************/
 #define VAL_VFG_SHOW_NUM_BIT          6
 #define VAL_VFG_SHOW_POINT_BIT        6
-#define VAL_VFG_SHOW_TOTAL_LINE       5                     //总行数，包含变量固定行和几个数字行和exit行
-#define LINE_MAX                      4
+#define VAL_VFG_SHOW_TOTAL_LINE       6                     //总行数，包含变量固定行和几个数字行和exit行
+#define LINE_MAX                      VAL_VFG_SHOW_TOTAL_LINE-1
 uint8 up_down_flag = 0;         //调参菜单在上面还是在下面，默认为0在下面，为1在上面
 float basic_1, basic_10, basic_100 ;
 uint16_t menu_Val_CFG_line;
@@ -203,6 +203,10 @@ void menu_Val_CFG(float *CFG_val, uint16 page_start_row, float basic_val )
                         break;
 
                     case 4:
+                        *CFG_val = 0;
+                        break;
+
+                    case 5:
                         CFG_stop_flag = 1;
                         break;
                 }
@@ -279,7 +283,7 @@ void menu_Val_CFG(float *CFG_val, uint16 page_start_row, float basic_val )
                 }
             }
             menu_Val_CFG_Flush(CFG_val, page_start_row, based_flag);
-            Beep_ShortRing();
+//            Beep_ShortRing();
             Flash_WriteAllVal();
         }
     }
@@ -303,6 +307,7 @@ void menu_Val_CFG_clear(uint16 *page_start_row)
         {
             ips200_draw_line(0, i, 239, i, RGB565_BLACK);
         }
+//        IPS200_Full_Parts(0, 240, *page_start_row + 18, *page_start_row + 10+18 + VAL_VFG_SHOW_TOTAL_LINE * 18);
         *page_start_row = *page_start_row + 5 + 18 * 1;
 
     }
@@ -339,8 +344,11 @@ void menu_Val_CFG_Flush(float *CFG_val, uint16 page_start_row,  bool temp_based_
             if(menu_Val_CFG_line == 3)  ips200_show_float_color(18, page_start_row + 18 * menu_Val_CFG_line, basic_100, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_RED);
             else                ips200_show_float_color(18, page_start_row + 18 * 3, basic_100, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT,RGB565_WHITE);
 
-            if(menu_Val_CFG_line == 4)  ips200_show_string_color(18, page_start_row + 18 * menu_Val_CFG_line, "exit", RGB565_RED);
-            else                ips200_show_string_color(18, page_start_row + 18 * 4, "exit", RGB565_WHITE);
+            if(menu_Val_CFG_line == 4)  ips200_show_string_color(18, page_start_row + 18 * menu_Val_CFG_line, "empty", RGB565_RED);
+            else                ips200_show_string_color(18, page_start_row + 18 * 4, "empty", RGB565_WHITE);
+
+            if(menu_Val_CFG_line == 5)  ips200_show_string_color(18, page_start_row + 18 * menu_Val_CFG_line, "exit", RGB565_RED);
+            else                ips200_show_string_color(18, page_start_row + 18 * 5, "exit", RGB565_WHITE);
 
         }
         else
@@ -348,7 +356,8 @@ void menu_Val_CFG_Flush(float *CFG_val, uint16 page_start_row,  bool temp_based_
             ips200_show_float(18, page_start_row + 18*1, basic_1, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
             ips200_show_float(18, page_start_row + 18*2, basic_10, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
             ips200_show_float(18, page_start_row + 18*3, basic_100, VAL_VFG_SHOW_NUM_BIT, VAL_VFG_SHOW_POINT_BIT);
-            ips200_show_string(18, page_start_row + 18*4, "exit");
+            ips200_show_string(18, page_start_row + 18*5, "exit");
+            ips200_show_string(18, page_start_row + 18*4, "empty");
         }
 
 //    uint8 i;
@@ -388,7 +397,7 @@ void menu_Val_CFG_Limit(uint16 *line, uint16 line_max)
 ************************************************/
 void menu_Val_CFG_Arrow_Show(uint16 page_start_row,uint16 line_num)
 {
-    for (uint16 i = 1; i <= 4; i++)
+    for (uint16 i = 1; i <= LINE_MAX; i++)
     {
         if (i == line_num)
         {
@@ -414,15 +423,15 @@ void menu_Set_CFG_OpenClose_Show(uint16 page_start_row, uint8 value)
 {
     if(value == 1)
     {
-        ips200_show_string(190, page_start_row, "Open ");
+        ips200_show_string(190, page_start_row * 18, "Open ");
     }
     else if(value == 0)
     {
-        ips200_show_string(190, page_start_row, "Close");
+        ips200_show_string(190, page_start_row * 18, "Close");
     }
     else
     {
-        ips200_show_string(190, page_start_row, "ValEr");
+        ips200_show_string(190, page_start_row * 18, "ValEr");
     }
 }
 /***********************************************
@@ -442,8 +451,8 @@ void menu_Set_CFG_Value_Toggle(uint8 *value)
 
 /***********************************************
 * @brief : 菜单选择行数刷新
-* @param : void
-* @return: line_num 行的地址，因使用了记忆行数，所以需要地址传入
+* @param : line_num 行的地址，因使用了记忆行数，所以需要地址传入
+* @return: void
 * @date  : 2024年11月6日13:12:04
 * @author: SJX
 * @exp   ：Line_Num_Flush(&line_number);
@@ -457,4 +466,66 @@ void Line_Num_Flush(int8 *line_num)
         pagelimit(&*line_num,line_number_max);
     }
     switch_encode_change_get_buff_flag = 0;
+}
+//void IPS200_Full_Parts(uint16 start_X, uint16 end_X, uint16 start_Y, uint16 end_Y)
+//{
+//    uint16 while_color_buffer[ips200_width_max], i, j;
+//    IPS200_CS(0);
+//    for(i = start_X; i < end_X; i ++)
+//    {
+//        while_color_buffer[i] = RGB565_WHITE;
+//    }
+//    for (j = start_Y; j < end_Y; j ++)
+//    {
+//        ips200_write_16bit_data_array(while_color_buffer, 240);
+//    }
+//    IPS200_CS(1);
+//}
+
+/***********************************************
+* @brief : 菜单退出键显示
+* @param : void
+* @return: uint8 行数
+* @date  : 2025年1月12日19:10:48
+* @author: SJX
+* @exp   ：
+************************************************/
+void Menu_Exit_Show(uint8 line_number)
+{
+    if(line_number!=1)     ips200_show_string_color(0, 18,"Exit", PenColor);
+     else                  ips200_show_string_color(0, 18,"Exit", PenColor_else);
+}
+
+/***********************************************
+* @brief : 显示行字符串
+* @param : void
+* @return: line_number 页面行数
+*          show_number 显示行数
+*          *str        字符串
+* @date  : 2025年1月12日19:10:48
+* @author: SJX
+* @exp   ：Menu_Display_Line_String(line_number, 1, "START");
+************************************************/
+void Menu_Display_Line_String(uint8 line_number, uint8 show_number, const char *str )
+{
+    if(line_number!=show_number)     ips200_show_string_color(0, 18 * (show_number), str, PenColor);
+     else                            ips200_show_string_color(0, 18 * (show_number), str, PenColor_else);
+}
+
+/***********************************************
+* @brief : 显示参数，含参数值和参数名
+* @param : void
+* @return: uint8 行数
+* @date  : 2025年1月12日19:10:48
+* @author: SJX
+* @exp   ：
+************************************************/
+#define VAL_SHOW_NUM_BIT          2
+#define VAL_SHOW_POINT_BIT        3
+#define VAL_SHOW_START_COL        162
+void Menu_Display_Line_Float_Parameter(uint8 line_number, uint8 show_number, const char *str, float value)
+{
+    if(line_number!=show_number)     ips200_show_string_color(0, 18 * (show_number), str, PenColor);
+     else                            ips200_show_string_color(0, 18 * (show_number), str, PenColor_else);
+    ips200_show_float(VAL_SHOW_START_COL, 18 * (show_number), value, VAL_SHOW_NUM_BIT, VAL_SHOW_POINT_BIT);
 }

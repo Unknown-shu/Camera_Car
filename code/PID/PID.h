@@ -34,7 +34,12 @@ extern PID_IncTypeDef Motor_Speed_PID_Left;
 extern PID_IncTypeDef Motor_Speed_PID_Right;
 extern PID_IncTypeDef Turn_Speed_PID;
 extern PID_IncTypeDef Straight_Speed_PID;
+extern PID_IncTypeDef Speed_PID;
+extern PID_IncTypeDef Angle_PID;
+extern PID_IncTypeDef Angle_AccPID;
 
+extern PID_IncTypeDef Speedcirle_PID;
+extern PID_IncTypeDef Angleroll_PID;
 /*****************************************************函数部分**************************************************************/
 void PID_Inc_Init(PID_IncTypeDef *sptr, float kp, float ki, float kd);
 float Positional_PID(PID_IncTypeDef *PID, float SetValue, float ActualValue, float Max_I);

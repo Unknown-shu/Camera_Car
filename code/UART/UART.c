@@ -11,6 +11,8 @@ void UART_Init(void)
 //    uart_init(UART_INDEX, UART_BAUDRATE, UART_TX_PIN, UART_RX_PIN);             // ³õÊ¼»¯´®¿Ú
 //    uart_init(UART_2, UART_BAUDRATE, UART2_TX_P10_5, UART2_RX_P10_6);
     uart_init(UART_0, UART_BAUDRATE, UART0_TX_P14_0, UART0_RX_P14_1);
+//    uart_init(UART_1, 460800, UART1_TX_P20_10, UART1_RX_P11_10);
+//    uart_rx_interrupt(UART_1, 1);
 }
 
 //void MyUART_Write_Buffer(float DATA1, float DATA2, float DATA3, float DATA4 )

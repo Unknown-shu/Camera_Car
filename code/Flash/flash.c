@@ -13,7 +13,7 @@
  */
 #include "FLASH.H"
 
-uint8 g_flash_enable_flag = 1;                         //flash启用标志位，为1代表启用，为0默认启用,extern全局变量
+uint8 g_flash_enable_flag = 0;                         //flash启用标志位，为1代表启用，为0默认启用,extern全局变量
 
 void Flash_Init(void)
 {

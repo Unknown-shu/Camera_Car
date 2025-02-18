@@ -8,10 +8,45 @@
 int target_left = 0,target_right = 0;          //左右轮的目标速度的值
 
 float V0 = 80;
-//float turn_V0 = 70;
-//float straight_V0 = 100;
 float basic_V0 = 120;
 int pwm_left = 0,pwm_right = 0;
+
+
+
+#if MOTOR_MODE == 2
+
+void Motor_Init(void)
+{
+    small_driver_uart_init();
+}
+
+/***********************************************
+* @brief : 无刷驱动 设置电机占空比
+* @param : void
+* @return: left_duty  左占空比
+*          right_duty 右占空比
+* @date  : 2025年1月12日21:28:43
+* @author: SJX
+************************************************/
+void Seekfree_FOC_Duty_Set(int16 left_duty, int16 right_duty)
+{
+    small_driver_set_duty(-left_duty, right_duty);
+}
+
+/***********************************************
+* @brief : 停车
+* @param : void
+* @return: void
+* @date  : 2025年1月12日21:28:40
+* @author: SJX
+************************************************/
+void Motor_Stop(void)
+{
+    Seekfree_FOC_Duty_Set(0, 0);
+}
+
+#endif
+
 
 #if MOTOR_MODE == 0
 
@@ -138,6 +173,7 @@ void MotorSetPWM(int pwm_left,int pwm_right)
     }
 }
 #endif
+#if MOTOR_MODE == 1 || MOTOR_MODE == 0
 /***********************************************
 * @brief : 增量式PI控制电机转速
 * @param : void
@@ -205,7 +241,7 @@ void Turn_Ctrl(void)
 //    speed_delta = Positional_PID(&Turn_Speed_PID, Target_Column, Target_Column - g_camera_mid_err, 20);
 #endif
 
-    if(abs(Target_Column - g_camera_mid_err) < 3 )
+    if(abs(Target_Column - g_ca mera_mid_err) < 3 )
     {
         g_camera_mid_err = 0;
     }
@@ -236,3 +272,4 @@ void Motor_Stop(void)
     MotorSetPWM(0, 0);
 }
 
+#endif
